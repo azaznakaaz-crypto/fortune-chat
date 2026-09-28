@@ -33,6 +33,10 @@ body{color:var(--brown);font-family:var(--f-body);font-size:15px;line-height:1.7
 .board-head p{margin:0;color:var(--muted);max-width:70ch}
 .toggle{display:flex;align-items:center;gap:10px;background:var(--ivory);border:1px solid var(--line);border-radius:999px;padding:8px 16px;font-size:14px;cursor:pointer;user-select:none}
 .toggle input{width:18px;height:18px;accent-color:var(--brown)}
+.controls{display:flex;flex-wrap:wrap;gap:10px}
+.seg{display:flex;align-items:center;gap:4px;background:var(--ivory);border:1px solid var(--line);border-radius:999px;padding:4px 6px 4px 14px;font-size:14px}
+.seg label{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;cursor:pointer}
+.seg input{accent-color:var(--brown)}
 .frames{display:grid;grid-template-columns:auto minmax(0,1fr);gap:28px;align-items:start}
 @media (max-width:980px){.frames{grid-template-columns:minmax(0,1fr)}}
 .frame-label{font-size:13px;letter-spacing:.08em;color:var(--muted);margin:0 0 8px}
@@ -69,6 +73,9 @@ body{color:var(--brown);font-family:var(--f-body);font-size:15px;line-height:1.7
 .s-head .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
 .logo-word{display:block;text-decoration:none}
 .logo-word img{height:30px;width:auto;mix-blend-mode:multiply}
+.logo-word .lf{display:none;height:50px;-webkit-mask-image:radial-gradient(ellipse 70% 70% at 50% 50%,#000 62%,transparent 98%);mask-image:radial-gradient(ellipse 70% 70% at 50% 50%,#000 62%,transparent 98%)}
+.board.hdr-full .logo-word .lw{display:none}
+.board.hdr-full .logo-word .lf{display:block}
 .s-nav{display:none}
 .menu-btn{width:44px;height:44px;border:1px solid var(--line);background:transparent;border-radius:8px;display:grid;place-content:center;gap:5px;cursor:pointer}
 .menu-btn span{display:block;width:18px;height:1.5px;background:var(--brown)}
@@ -99,6 +106,13 @@ body{color:var(--brown);font-family:var(--f-body);font-size:15px;line-height:1.7
 .photo img{width:100%;height:100%;object-fit:cover}
 .img-note{position:absolute;right:8px;bottom:8px;font-size:11px;line-height:1;color:#5E4E40;background:rgba(250,247,242,.88);border-radius:3px;padding:4px 6px}
 .sec-photo-note{font-size:13px;color:var(--muted);text-align:center;margin-top:16px}
+
+/* 移行のお知らせ */
+.notice-bar{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:4px 12px;background:var(--beige);border-bottom:1px solid var(--line);padding:10px 20px;font-size:14px;line-height:1.6;text-align:center;text-decoration:none}
+.notice-bar .more{font-weight:700;border-bottom:1px solid var(--gold)}
+.switch{margin-top:22px;background:var(--beige);border-radius:14px;padding:20px;display:grid;gap:10px}
+.switch h3{font-size:18px;letter-spacing:.08em}
+.switch ol{margin:0;padding-left:1.4em;display:grid;gap:6px;font-size:15px}
 
 /* ① メインビジュアル */
 .hero{padding-block:28px 0}
@@ -224,6 +238,7 @@ details p{padding-bottom:14px;font-size:15px}
   .wrap{padding-inline:40px}
   .s-head .wrap{height:76px}
   .logo-word img{height:36px}
+  .logo-word .lf{height:64px}
   .menu-btn{display:none}
   .s-nav{display:flex;align-items:center;gap:24px;font-size:15px}
   .s-nav a{text-decoration:none}
@@ -254,7 +269,7 @@ details p{padding-bottom:14px;font-size:15px}
   .reserve{grid-template-columns:repeat(3,1fr);gap:24px}
   .rv{grid-template-rows:auto auto 1fr auto;padding:24px}
   .rv .btn{align-self:end}
-  .prods{grid-template-columns:repeat(3,1fr);gap:24px}
+  .prods{grid-template-columns:minmax(0,520px);justify-content:center}
   .plans{grid-template-columns:1fr 1fr;gap:28px}
   .steps{grid-template-columns:repeat(4,1fr)}
   .info{grid-template-columns:1.1fr 1.3fr 1fr;gap:44px}
@@ -291,10 +306,13 @@ details p{padding-bottom:14px;font-size:15px}
 <div class="board" id="board">
   <header class="board-head">
     <div>
-      <h1>Arcis トップページ デザイン見本（第2版）</h1>
+      <h1>Arcis トップページ デザイン見本（第3版）</h1>
       <p>スマートフォン版（左）とパソコン版（右）。枠の中はスクロールできます。点線の枠と「確認用」の印は、公開前に確定・削除する箇所です。</p>
     </div>
-    <label class="toggle" for="t-public"><input type="checkbox" id="t-public"> 確認用の印を隠して公開時の見え方にする</label>
+    <div class="controls">
+      <div class="seg" role="radiogroup" aria-label="ヘッダーのロゴ">ヘッダーのロゴ：<label for="h-word"><input type="radio" name="hdr" id="h-word" value="word" checked>文字のみ</label><label for="h-full"><input type="radio" name="hdr" id="h-full" value="full">マーク付き</label></div>
+      <label class="toggle" for="t-public"><input type="checkbox" id="t-public"> 確認用の印を隠して公開時の見え方にする</label>
+    </div>
   </header>
 
   <div class="frames">
@@ -325,10 +343,10 @@ details p{padding-bottom:14px;font-size:15px}
     <section class="note">
       <h2>写真とロゴについて</h2>
       <ul>
-        <li>写真はリーフレット画像からの切り出しです。解像度が低いため、<b>本番では元の写真データ</b>が必要です</li>
-        <li>すべての写真に「イメージ」と表示しています。<b>実際の教室・講師の写真</b>がどれか教えてください（その写真だけ表示を外します）</li>
-        <li>ロゴは表紙から切り出して、形と縦横比をそのまま使っています。ヘッダーには「Arcis」の文字部分だけを使っています。この使い方でよいか確認させてください</li>
-        <li>商品の写真はリーフレットにないため、写真枠は空けたままです（別の写真を商品に見せかけないため）</li>
+        <li>写真はすべてリーフレットの画像生成イメージからの切り出しで、「イメージ」と表示しています。高画質版の一覧は <code>docs/image-list.md</code></li>
+        <li>ロゴは表紙から切り出した仮のものです（形・縦横比は変えていません）</li>
+        <li><b>ヘッダーのロゴは、上の切り替えで「文字のみ」と「マーク付き」を比べられます</b></li>
+        <li>ヨガパンツは実物の写真が必要です（イメージ画像を商品写真に使わないため、枠は空けています）</li>
       </ul>
     </section>
     <section class="note">
@@ -338,7 +356,7 @@ details p{padding-bottom:14px;font-size:15px}
         <li><span class="k">予約</span>月会員・ポイントの方式が決まるまで、予約成立の説明文は仮</li>
         <li><span class="k">残席・在庫</span>自動で最新にできるまで、数字は出さず「空き状況を確認する」「在庫を確認する」の入口にしています</li>
         <li><span class="k">体験</span>リーフレットでは「LINEまたはInstagramのDMで予約」。オンライン予約に一本化するか</li>
-        <li><span class="k">LINE</span>リーフレットのQRコードは画像から読み取れませんでした。正式なURLを教えてください（印刷物のQRが読めるかもご確認ください）</li>
+        <li><span class="k">移行</span>DM受付の終了日（切替日）と、上部のお知らせの掲載期間</li>
         <li><span class="k">Instagram</span>@arcis.yoga のURLを確認のうえリンクします</li>
       </ul>
     </section>
@@ -349,7 +367,7 @@ details p{padding-bottom:14px;font-size:15px}
 <div class="site">
   <header class="s-head">
     <div class="wrap">
-      <a class="logo-word" href="#top" aria-label="Arcis トップへ"><img src="assets/wordmark.png" alt="Arcis" width="375" height="112"></a>
+      <a class="logo-word" href="#top" aria-label="Arcis トップへ"><img class="lw" src="assets/wordmark.png" alt="Arcis" width="375" height="112"><img class="lf" src="assets/logo.png" alt="Arcis" width="530" height="560"></a>
       <nav class="s-nav" aria-label="メインメニュー">
         <a href="#about">Arcisとは</a>
         <a href="#programs">できること</a>
@@ -363,13 +381,14 @@ details p{padding-bottom:14px;font-size:15px}
   </header>
 
   <main>
+    <a class="notice-bar drb" href="#switch"><span>お申し込み方法が変わります。これまでのInstagramのDMから、このサイトでのご予約・ご購入へ。</span><span class="more">くわしく ›</span><span class="dr">切替日を確定</span></a>
     <!-- ① メインビジュアル -->
     <section class="hero">
       <div class="wrap hero-grid">
         <div class="hero-body">
           <img class="hero-logo" src="assets/logo.png" alt="Arcis ロゴ" width="530" height="560">
           <h1 class="hero-copy"><span>まっすぐな光、</span><span>自分に還る時間</span></h1>
-          <p class="progs"><span>Yoga</span><i>·</i><span>Crystal Bowl</span><i>·</i><span>Flower Mandala</span><i>·</i><span>Yoga Philosophy</span></p>
+          <p class="progs"><span>Yoga<i>·</i></span><span>Crystal Bowl<i>·</i></span><span>Flower Mandala<i>·</i></span><span>Yoga Philosophy</span></p>
           <p class="hero-lead">心と身体を整え、暮らしそのものを整える場所。<br>あなたの中には、いつもまっすぐな光があります。<br>その光を思い出す時間を、Arcisで。</p>
           <div class="hero-cta" data-hide-dock>
             <a class="btn btn-primary" href="#reserve">レッスンを予約する</a>
@@ -473,6 +492,16 @@ details p{padding-bottom:14px;font-size:15px}
           <p class="go-note" style="font-size:14.5px;color:var(--brown)">「空き状況を確認する」を押すと、オンラインの予約画面に移動します。日時を選び、お名前・連絡先を入力してお申し込みください。お支払いはSquare（スクエア）の画面で安全に行われ、カード情報がArcisに保存されることはありません。</p>
           <p class="drb" style="font-size:14px;color:var(--draft)"><span class="dr">確認用</span>予約成立のタイミング：体験・1回参加は「お支払い完了時」。月会員・ポイントでのご予約は、方式が決まってから記載します。</p>
         </div>
+        <div class="switch" id="switch" data-hide-dock>
+          <h3>これまでInstagramのDMでお申し込みいただいていた方へ</h3>
+          <ol>
+            <li>ご予約は、このページの「空き状況を確認する」からお申し込みください。<span class="dr">DM受付の終了日を確定</span></li>
+            <li>すでにDMでお受けしているご予約は、そのまま有効です。改めてのお申し込みは不要です。</li>
+            <li>月会員の方のご予約方法は、個別にご案内します。<span class="dr">方式決定後に記載</span></li>
+            <li>操作がわからないときは、公式LINEでお気軽にご相談ください。</li>
+          </ol>
+          <a class="btn btn-outline btn-small" href="https://line.me/R/ti/p/@317tvtys" target="_blank" rel="noopener" style="justify-self:start">公式LINEで相談する</a>
+        </div>
       </div>
     </section>
 
@@ -481,20 +510,13 @@ details p{padding-bottom:14px;font-size:15px}
       <div class="wrap">
         <div class="sec-title"><h2>商品のご案内</h2><span class="rule"><svg><use href="#i-star"/></svg></span></div>
         <p class="sec-lead">暮らしの中で、Arcisの時間を感じていただけるものを。</p>
-        <div class="prods drb" data-hide-dock>
+        <div class="prods" data-hide-dock>
           <article class="prod">
-            <div class="prod-ph"><svg><use href="#i-bag"/></svg></div>
-            <div><h3>商品名<span class="dr">未定</span></h3><p class="p">税込価格<span class="dr">未定</span></p><a class="btn btn-outline btn-small" href="#shop">在庫を確認する</a></div>
-          </article>
-          <article class="prod">
-            <div class="prod-ph"><svg><use href="#i-bag"/></svg></div>
-            <div><h3>商品名<span class="dr">未定</span></h3><p class="p">税込価格<span class="dr">未定</span></p><a class="btn btn-outline btn-small" href="#shop">在庫を確認する</a></div>
-          </article>
-          <article class="prod">
-            <div class="prod-ph"><svg><use href="#i-bag"/></svg></div>
-            <div><h3>商品名<span class="dr">未定</span></h3><p class="p">税込価格<span class="dr">未定</span></p><a class="btn btn-outline btn-small" href="#shop">在庫を確認する</a></div>
+            <div class="prod-ph drb"><svg><use href="#i-bag"/></svg></div>
+            <div><h3>ヨガパンツ</h3><p class="p">サイズ・カラー・税込価格<span class="dr">確定後に掲載</span></p><a class="btn btn-outline btn-small" href="#shop">在庫を確認する</a></div>
           </article>
         </div>
+        <p class="sec-photo-note"><span class="dr">商品写真は実物の撮影が必要</span></p>
         <div class="shop-foot">
           <a class="btn btn-primary" href="#shop">オンラインショップを見る</a>
           <p class="go-note">Square（スクエア）のオンラインショップに移動します。送料・お届け先の入力とお支払いはショップの画面で行います。</p>
@@ -578,20 +600,18 @@ details p{padding-bottom:14px;font-size:15px}
               <p>阿蘇の山々を一望できる、静かなスタジオです。</p>
             </div>
             <div class="photo access-photo"><img src="assets/studio.jpg" alt="大きな窓から山並みが見える木の床のスタジオ" width="248" height="175"><span class="img-note">イメージ</span></div>
-            <p class="dr" style="margin-top:10px">実際のスタジオ写真か確認</p>
           </div>
           <div id="faq">
             <h3>よくあるご質問</h3>
             <details><summary>はじめてでも参加できますか？</summary><p>はい。はじめての方も安心してご参加いただけます。まずは体験レッスン（1,000円・税込）からどうぞ。</p></details>
             <details><summary>オンラインでも参加できますか？</summary><p>はい。ライブレッスン（Zoom）で、全国どこからでもご参加いただけます。</p></details>
-            <details class="drb"><summary>キャンセルはできますか？</summary><p><span class="dr">規定確定後に掲載</span>レッスン開始24時間前までのキャンセルは全額返金、当日・無断欠席は受講料の100％をご負担いただく方向で検討中です。</p></details>
+            <details class="drb"><summary>キャンセルはできますか？</summary><p><span class="dr">規定確定後に掲載</span>クラス開始時刻の24時間前までのキャンセルは全額返金です（例：10月10日10:00開始なら、10月9日10:00まで）。それを過ぎてからのキャンセルと無断欠席は、受講料の全額をご負担いただきます。</p></details>
             <details class="drb"><summary>支払い方法は何がありますか？</summary><p><span class="dr">確定後に掲載</span>クレジットカードなど、Squareで受け付ける方法を掲載します。</p></details>
           </div>
           <div id="contact">
             <h3>ご予約・お問い合わせ</h3>
             <div class="contact">
-              <a class="btn btn-primary" href="#contact">公式LINEで問い合わせる</a>
-              <span class="dr" style="justify-self:start">LINEのURL未確認</span>
+              <a class="btn btn-primary" href="https://line.me/R/ti/p/@317tvtys" target="_blank" rel="noopener">公式LINEで問い合わせる</a>
               <a class="btn btn-outline" href="#contact">Instagram　@arcis.yoga</a>
               <span class="dr" style="justify-self:start">InstagramのURLを確認のうえリンク</span>
               <p class="mail"><span>メール</span>arcis.yoga.life@gmail.com</p>
@@ -670,5 +690,6 @@ details p{padding-bottom:14px;font-size:15px}
   if(window.ResizeObserver){new ResizeObserver(fit).observe(scaler);}else{window.addEventListener('resize',fit);}
   var t=document.getElementById('t-public');
   t.addEventListener('change',function(){document.getElementById('board').classList.toggle('public',t.checked);});
+  document.querySelectorAll('input[name="hdr"]').forEach(function(r){r.addEventListener('change',function(){document.getElementById('board').classList.toggle('hdr-full',r.value==='full'&&r.checked);});});
 })();
 </script>
