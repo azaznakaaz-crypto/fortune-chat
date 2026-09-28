@@ -1,240 +1,301 @@
 <title>Arcis トップページ見本</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Shippori+Mincho:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Shippori+Mincho:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
 <style>
-/* ===== ブランドの色（リーフレットの印象からの仮の近似色） ===== */
+/* ===== ブランドの色（リーフレットの印象からの近似色） ===== */
 :root{
   --ivory:#FAF7F2;      /* 背景 */
   --beige:#F1E9DE;      /* 補助背景 */
-  --gold:#B78B45;       /* 装飾・罫線・ロゴ（小さな文字には使わない） */
-  --gold-text:#7E5D2B;  /* 小さな金色文字用（背景との差を確保） */
+  --gold:#B78B45;       /* 装飾・罫線（小さな文字には使わない） */
+  --gold-text:#7E5D2B;  /* 小さな金色文字（背景との差を確保） */
   --brown:#493729;      /* 本文・ボタン */
-  --brown-deep:#34271C; /* ボタンを押したとき */
-  --muted:#6A5847;      /* 補足文字 */
-  --line:#DED0BB;       /* 罫線 */
+  --brown-deep:#34271C;
+  --muted:#6A5847;
+  --line:#DED0BB;
   --white:#FFFFFF;
-  --tmp:#8C4B3A;        /* 仮表示の目印 */
-  --tmp-bg:#F6E7DF;
+  --draft:#8C4B3A;
+  --draft-bg:#F7E9E2;
   --f-head:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
   --f-body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
   --f-latin:"Cormorant Garamond","Shippori Mincho",serif;
   color-scheme:light;
 }
-html,body{background:#E9E2D6;}
-body{color:var(--brown);font-family:var(--f-body);font-size:15px;line-height:1.7;padding-inline:16px;padding-block:24px 48px;}
 *{box-sizing:border-box}
+html,body{background:#E8E1D5}
+body{color:var(--brown);font-family:var(--f-body);font-size:15px;line-height:1.7;padding-inline:16px;padding-block:24px 56px}
 :focus-visible{outline:2px solid var(--gold-text);outline-offset:3px}
 
-/* ===== 見本ページの枠 ===== */
-.board{max-width:1720px;margin:0 auto;display:grid;gap:28px}
-.board-head h1{font-family:var(--f-head);font-weight:500;font-size:26px;margin:0 0 6px;text-wrap:balance}
+/* ===== 見本ボード（利用者向けページの外側） ===== */
+.board{max-width:1720px;margin:0 auto;display:grid;gap:24px}
+.board-head{display:flex;flex-wrap:wrap;gap:12px 32px;align-items:end;justify-content:space-between}
+.board-head h1{font-family:var(--f-head);font-weight:500;font-size:26px;margin:0 0 4px}
 .board-head p{margin:0;color:var(--muted);max-width:70ch}
-.notice{background:var(--tmp-bg);color:var(--tmp);border:1px solid #E6CBBE;border-radius:8px;padding:10px 14px;font-size:14px;max-width:80ch}
+.toggle{display:flex;align-items:center;gap:10px;background:var(--ivory);border:1px solid var(--line);border-radius:999px;padding:8px 16px;font-size:14px;cursor:pointer;user-select:none}
+.toggle input{width:18px;height:18px;accent-color:var(--brown)}
 .frames{display:grid;grid-template-columns:auto minmax(0,1fr);gap:28px;align-items:start}
 @media (max-width:980px){.frames{grid-template-columns:minmax(0,1fr)}}
 .frame-label{font-size:13px;letter-spacing:.08em;color:var(--muted);margin:0 0 8px}
-.frame-sp .device{width:390px;max-width:100%;height:780px;border:10px solid #2E2620;border-radius:36px;overflow:hidden;background:var(--ivory);box-shadow:0 10px 30px rgba(52,39,28,.18)}
+.frame-sp .device{width:390px;max-width:100%;height:800px;border:10px solid #2E2620;border-radius:36px;overflow:hidden;background:var(--ivory);box-shadow:0 10px 30px rgba(52,39,28,.18)}
 .frame-sp .viewport{height:100%;overflow-y:auto;overscroll-behavior:contain}
 .frame-pc .device{border:1px solid #CFC2AE;border-radius:10px;overflow:hidden;background:var(--ivory);box-shadow:0 10px 30px rgba(52,39,28,.14)}
 .frame-pc .bar{height:26px;background:#EDE6DA;border-bottom:1px solid #D8CCB9;display:flex;align-items:center;gap:6px;padding-inline:10px}
 .frame-pc .bar i{width:9px;height:9px;border-radius:50%;background:#CDBFA9;display:block}
 .frame-pc .scaler{overflow:hidden;position:relative}
-.frame-pc .viewport{width:1280px;height:800px;overflow-y:auto;transform-origin:0 0;overscroll-behavior:contain}
-.frame-pc .viewport.fit{position:absolute;top:0;left:0}
-.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:20px}
+.frame-pc .viewport{position:absolute;top:0;left:0;width:1280px;height:820px;overflow-y:auto;transform-origin:0 0;overscroll-behavior:contain}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:20px}
 .note{background:var(--ivory);border:1px solid var(--line);border-radius:10px;padding:18px 20px}
 .note h2{font-family:var(--f-head);font-weight:500;font-size:18px;margin:0 0 10px}
 .note ul{margin:0;padding-left:1.2em}
-.note li{margin-bottom:4px}
-.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:6px}
-.sw{border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:12.5px;background:var(--white)}
-.sw b{display:block;height:44px}
-.sw span{display:block;padding:6px 8px;font-variant-numeric:tabular-nums}
+.note li{margin-bottom:5px}
+.note .k{display:inline-block;font-size:12px;font-weight:700;color:var(--draft);background:var(--draft-bg);border-radius:4px;padding:1px 6px;margin-right:4px}
 
-/* ===== ここからサイト本体 ===== */
+/* 確認用の印（本公開では外す） */
+.dr{display:inline-block;font-family:var(--f-body);font-size:11.5px;line-height:1;font-weight:700;letter-spacing:.04em;color:var(--draft);background:var(--draft-bg);border:1px dashed #D2A595;border-radius:4px;padding:4px 6px;vertical-align:middle;white-space:nowrap;margin-inline:4px}
+.drb{outline:1.5px dashed #D2A595;outline-offset:4px;border-radius:6px}
+.board.public .dr{display:none}
+.board.public .drb{outline:none}
+
+/* ===== サイト本体 ===== */
 .site{container-type:inline-size;container-name:site;background:var(--ivory);color:var(--brown);font-family:var(--f-body);font-size:16px;line-height:1.85;min-height:100%}
 .site a{color:inherit}
-.site h2,.site h3{font-family:var(--f-head);font-weight:500;color:var(--brown);text-wrap:balance;margin:0}
+.site h1,.site h2,.site h3{font-family:var(--f-head);font-weight:500;color:var(--brown);text-wrap:balance;margin:0}
+:where(.site) p{margin:0}
+.site img{display:block;max-width:100%;height:auto}
 .wrap{padding-inline:20px;max-width:1120px;margin:0 auto}
-.tmp{display:inline-block;font-family:var(--f-body);font-size:12px;line-height:1;font-weight:700;letter-spacing:.04em;color:var(--tmp);background:var(--tmp-bg);border:1px dashed #D5A999;border-radius:4px;padding:4px 6px;vertical-align:middle;white-space:nowrap}
-.tmp-text{color:var(--muted)}
 
 /* ヘッダー */
-.s-head{position:sticky;top:0;z-index:5;background:rgba(250,247,242,.96);border-bottom:1px solid var(--line)}
+.s-head{position:sticky;top:0;z-index:5;background:var(--ivory);border-bottom:1px solid var(--line)}
 .s-head .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
-.logo{display:flex;align-items:center;gap:8px;text-decoration:none}
-.logo-mark{font-family:var(--f-latin);font-size:26px;letter-spacing:.2em;color:var(--gold-text);line-height:1;border:1px dashed var(--gold);padding:5px 4px 5px 9px;border-radius:3px}
-.logo small{font-size:11px;color:var(--tmp);font-weight:700}
+.logo-word{display:block;text-decoration:none}
+.logo-word img{height:30px;width:auto;mix-blend-mode:multiply}
 .s-nav{display:none}
 .menu-btn{width:44px;height:44px;border:1px solid var(--line);background:transparent;border-radius:8px;display:grid;place-content:center;gap:5px;cursor:pointer}
 .menu-btn span{display:block;width:18px;height:1.5px;background:var(--brown)}
 
 /* ボタン */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:12px 22px;border-radius:8px;font-family:var(--f-body);font-size:16px;font-weight:700;letter-spacing:.04em;text-decoration:none;cursor:pointer;border:1.5px solid var(--brown)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:12px 22px;border-radius:8px;font-family:var(--f-body);font-size:16px;font-weight:700;letter-spacing:.04em;text-decoration:none;cursor:pointer;border:1.5px solid var(--brown);text-align:center;line-height:1.4}
 .site .btn-primary{background:var(--brown);color:var(--white)}
 .site .btn-primary:hover{background:var(--brown-deep)}
 .site .btn-outline{background:var(--white);color:var(--brown)}
 .site .btn-outline:hover{background:var(--beige)}
-.btn-small{min-height:44px;padding:8px 16px;font-size:15px}
-.site .btn[aria-disabled="true"]{background:#E7E1D8;border-color:#CFC5B7;color:#6F655B;cursor:not-allowed}
-.btn .arrow{font-weight:400}
+.btn-small{min-height:46px;padding:9px 16px;font-size:15px}
+.go-note{font-size:13.5px;color:var(--muted);line-height:1.6}
 
-/* 見出しの装飾（細い金線＋小さな星） */
-.sec{padding-block:64px}
+/* 見出し（細い金線＋小さな星） */
+.sec{padding-block:60px}
 .sec-alt{background:var(--beige)}
-.sec-title{text-align:center;display:grid;gap:10px;justify-items:center;margin-bottom:36px}
-.sec-title .en{font-family:var(--f-latin);font-size:15px;letter-spacing:.28em;color:var(--gold-text);text-transform:uppercase}
-.sec-title h2{font-size:25px;letter-spacing:.08em}
-.rule{display:flex;align-items:center;gap:10px;width:150px;color:var(--gold)}
-.rule::before,.rule::after{content:"";flex:1;height:1px;background:var(--gold)}
-.rule svg{width:12px;height:12px;flex:none}
+.sec-title{text-align:center;display:grid;gap:12px;justify-items:center;margin-bottom:28px}
+.sec-title h2{font-size:25px;letter-spacing:.12em}
+.sec-title .lat{font-family:var(--f-latin);font-weight:500;letter-spacing:.04em}
+.sec-lead{text-align:center;max-width:34em;margin:0 auto 32px;font-family:var(--f-head);font-size:16px;line-height:2}
+.rule{display:flex;align-items:center;gap:10px;width:160px;color:var(--gold)}
+.rule::before,.rule::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--gold))}
+.rule::after{background:linear-gradient(90deg,var(--gold),transparent)}
+.rule svg{width:14px;height:14px;flex:none}
+
+/* 写真 */
+.photo{position:relative;overflow:hidden;border-radius:12px;background:var(--beige)}
+.photo img{width:100%;height:100%;object-fit:cover}
+.img-note{position:absolute;right:8px;bottom:8px;font-size:11px;line-height:1;color:#5E4E40;background:rgba(250,247,242,.88);border-radius:3px;padding:4px 6px}
+.sec-photo-note{font-size:13px;color:var(--muted);text-align:center;margin-top:16px}
 
 /* ① メインビジュアル */
-.hero{position:relative}
-.hero-photo{position:relative;aspect-ratio:4/3;max-width:100%;overflow:hidden;background:
-  radial-gradient(120% 70% at 78% 8%,#FFF9EC 0%,#F9EBD2 28%,rgba(249,235,210,0) 60%),
-  linear-gradient(180deg,#F4E6CF 0%,#EFE3D0 55%,#E4D6C0 100%)}
-.hero-photo svg.mtn{position:absolute;inset:auto 0 0 0;width:100%;height:58%}
-.ph-label{position:absolute;left:12px;bottom:12px;font-size:12px;line-height:1.4;background:rgba(250,247,242,.92);color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:5px 8px;max-width:calc(100% - 24px)}
-.hero-body{padding:34px 20px 8px;text-align:center;display:grid;gap:18px;justify-items:center}
-.hero-body .moon{width:44px;height:44px;color:var(--gold)}
-.hero-copy{font-family:var(--f-head);font-weight:500;font-size:28px;line-height:1.6;letter-spacing:.1em;margin:0;text-wrap:balance}
+.hero{padding-block:28px 0}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:26px}
+.hero-body{display:grid;gap:18px;justify-items:center;text-align:center}
+.hero-logo{width:196px;aspect-ratio:530/560;max-width:100%;mix-blend-mode:multiply;-webkit-mask-image:radial-gradient(ellipse 70% 70% at 50% 50%,#000 62%,transparent 98%);mask-image:radial-gradient(ellipse 70% 70% at 50% 50%,#000 62%,transparent 98%)}
+.hero-copy{font-size:24px;line-height:1.7;letter-spacing:.2em}
 .hero-copy span{display:inline-block}
-.hero-lead{margin:0;max-width:30em}
-.hero-cta{display:grid;gap:12px;width:100%;max-width:420px;margin-top:6px}
-.external-note{font-size:13.5px;color:var(--muted);margin:0;line-height:1.6}
+.progs{display:flex;flex-wrap:wrap;justify-content:center;column-gap:0;font-family:var(--f-latin);font-weight:500;font-size:17px;letter-spacing:.06em;line-height:1.7;color:var(--brown)}
+.progs span{white-space:nowrap}
+.progs i{font-style:normal;color:var(--gold);margin-inline:.5em}
+.hero-lead{font-family:var(--f-head);font-size:16px;line-height:2.05;max-width:26em}
+.hero-cta{display:grid;gap:12px;width:100%;max-width:420px;margin-top:4px}
+.hero-photo{aspect-ratio:678/385;margin-inline:-20px;border-radius:0}
 
-/* ② Arcisについて */
-.about{display:grid;gap:28px;align-items:center}
-.about p{margin:0 0 1em}
-.about-art{justify-self:center;width:180px;color:var(--gold)}
+/* ② Arcisとは */
+.about{display:grid;gap:30px;align-items:center}
+.about-text{display:grid;gap:22px;font-family:var(--f-head);font-size:16.5px;line-height:2.1}
+.about-text .first{font-size:19px;line-height:2}
+.about-photo{aspect-ratio:4/3}
+.about-photo img{object-position:50% 60%}
+.branch{width:64px;mix-blend-mode:multiply;opacity:.9}
 
-/* ③ できること */
-.grid-6{display:grid;grid-template-columns:1fr;gap:20px}
-.card{background:var(--white);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(73,55,41,.05);display:flex;flex-direction:column}
-.card .ph{position:relative;aspect-ratio:3/2;max-width:100%;display:grid;place-items:center;color:var(--gold)}
-.card .ph svg{width:84px;height:84px}
-.card-body{padding:18px 20px 20px;display:grid;gap:6px;flex:1;align-content:start}
-.card-body h3{font-size:20px;letter-spacing:.06em}
-.card-body p{margin:0;font-size:15.5px}
-.card-body .more{margin-top:6px;font-size:15px;font-weight:700;text-decoration:none;color:var(--brown);border-bottom:1px solid var(--gold);justify-self:start;padding-bottom:2px}
-.ph-1{background:linear-gradient(160deg,#F6EEDF,#EADBC3)}
-.ph-2{background:linear-gradient(160deg,#F8EFE9,#EAD9CE)}
-.ph-3{background:linear-gradient(160deg,#F3F0EA,#DFD8CC)}
-.ph-4{background:linear-gradient(160deg,#F5EFE3,#E6DAC6)}
-.ph-5{background:linear-gradient(160deg,#EFEAE3,#DCD3C6)}
-.ph-6{background:linear-gradient(160deg,#F7F0E4,#EBDFCC)}
+/* ③ Arcisでできること */
+.acts{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.act{display:grid;grid-template-columns:84px 1fr;gap:16px;align-items:center;padding-block:16px;border-bottom:1px dashed var(--line)}
+.act:last-child{border-bottom:0}
+.act .photo{width:84px;height:84px;border-radius:50%}
+.act .badge{display:none}
+.act h3{font-size:18.5px;letter-spacing:.1em;margin-bottom:2px}
+.act p{font-size:15px;line-height:1.75}
+.recommend{margin-top:40px;background:var(--ivory);border:1px solid var(--line);border-radius:14px;padding:26px 18px}
+.recommend h3{text-align:center;font-size:18px;letter-spacing:.14em;margin-bottom:18px;display:flex;align-items:center;justify-content:center;gap:12px}
+.recommend h3::before,.recommend h3::after{content:"";width:28px;height:1px;background:var(--gold)}
+.rec-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:18px 6px}
+.rec-list li{display:grid;justify-items:center;gap:8px;text-align:center;font-size:13.5px;line-height:1.55}
+.rec-list svg{width:34px;height:34px;color:var(--brown)}
 
-/* ④ 開催予定 */
-.sched{display:grid;gap:14px;list-style:none;margin:0;padding:0}
-.ev{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:grid;grid-template-columns:auto 1fr;gap:4px 16px;align-items:center}
-.ev-date{grid-row:span 2;text-align:center;min-width:64px;border-right:1px solid var(--line);padding-right:14px;font-variant-numeric:tabular-nums;line-height:1.2}
-.ev-date .m{font-size:13px;color:var(--muted)}
-.ev-date .d{font-family:var(--f-head);font-size:30px;font-weight:500}
-.ev-date .w{font-size:13px}
-.ev-title{font-weight:700;font-size:17px;line-height:1.5}
-.ev-meta{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:15px;font-variant-numeric:tabular-nums}
-.ev-meta .price{font-weight:700}
-.mode{display:inline-block;font-size:13px;font-weight:700;border-radius:999px;padding:1px 10px;border:1px solid var(--brown)}
-.mode-online{border-style:dashed}
-.ev-foot{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--line);margin-top:10px;padding-top:12px}
-.seat{font-size:15px;font-weight:700;display:flex;align-items:center;gap:6px}
-.seat::before{content:"";width:9px;height:9px;border-radius:50%;background:#6E8B5E}
-.seat-few::before{background:#B7792F}
-.seat-full{color:#6F655B}
-.seat-full::before{background:#A39A8F}
-.sched-foot{display:grid;gap:14px;justify-items:center;text-align:center;margin-top:28px}
-.box-note{background:var(--white);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:8px;padding:14px 16px;font-size:15px;text-align:left;max-width:640px}
-.box-note strong{display:block;margin-bottom:2px}
+/* ④ レッスンのご予約 */
+.reserve{display:grid;gap:16px}
+.rv{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:20px;display:grid;gap:10px}
+.rv-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.rv h3{font-size:19px;letter-spacing:.08em}
+.rv .price{font-family:var(--f-head);font-weight:600;font-size:24px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rv .price small{font-family:var(--f-body);font-weight:500;font-size:13px;margin-left:2px}
+.rv p{font-size:15px}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:13px;font-weight:700;border:1px solid var(--brown);border-radius:999px;padding:0 10px;line-height:1.9}
+.rv .btn{margin-top:4px}
+.flow-note{margin-top:22px;background:var(--white);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:8px;padding:14px 16px;font-size:15px;display:grid;gap:6px}
 
-/* ⑤ 商品紹介 */
-.grid-3{display:grid;grid-template-columns:1fr;gap:20px}
-.prod .ph{aspect-ratio:1/1}
-.prod .price{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
-.prod .price small{font-size:13px;font-weight:500}
-.stock{font-size:14.5px;font-weight:700}
-.stock-out{color:#6F655B}
+/* ⑤ 商品 */
+.prods{display:grid;gap:14px}
+.prod{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;grid-template-columns:96px 1fr;gap:14px;align-items:center}
+.prod-ph{width:96px;height:96px;border-radius:10px;background:var(--beige);display:grid;place-items:center;color:var(--gold)}
+.prod-ph svg{width:34px;height:34px}
+.prod h3{font-size:17px;letter-spacing:.06em}
+.prod .p{font-size:15px;color:var(--muted)}
+.prod .btn{margin-top:8px;justify-self:start}
+.shop-foot{display:grid;gap:10px;justify-items:center;text-align:center;margin-top:24px}
 
-/* ⑥ 料金・流れ */
-.price-table{width:100%;border-collapse:collapse;background:var(--white);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-variant-numeric:tabular-nums}
-.price-table th,.price-table td{padding:14px 16px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-.price-table th{font-weight:500}
-.price-table td{text-align:right;font-weight:700;white-space:nowrap}
-.price-table tr:last-child>*{border-bottom:0}
-.price-table .sub{display:block;font-size:13.5px;color:var(--muted);font-weight:400}
-.flow{list-style:none;margin:36px 0 0;padding:0;display:grid;gap:12px;counter-reset:step}
-.flow li{counter-increment:step;display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:start;background:var(--white);border:1px solid var(--line);border-radius:12px;padding:16px}
-.flow li::before{content:counter(step);width:44px;height:44px;border-radius:50%;border:1px solid var(--gold);display:grid;place-items:center;font-family:var(--f-head);font-size:20px;color:var(--gold-text)}
-.flow b{display:block;font-size:17px}
-.flow p{margin:0;font-size:15px}
+/* ⑥ 料金・ご案内 */
+.plans{display:grid;gap:22px;align-items:start}
+.plan{background:var(--white);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.plan-head{display:flex;align-items:center;gap:10px;padding:18px 20px 6px}
+.plan-head h3{font-size:19px;letter-spacing:.12em}
+.plan-head svg{width:26px;height:26px;color:var(--gold)}
+.pop{font-family:var(--f-head);font-size:11.5px;line-height:1.15;text-align:center;color:var(--white);background:var(--gold-text);border-radius:50%;width:44px;height:44px;display:grid;place-content:center}
+.rows{list-style:none;margin:0;padding:0 20px 8px}
+.rows li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-block:14px;border-bottom:1px solid var(--line)}
+.rows li:last-child{border-bottom:0}
+.rows b{display:block;font-family:var(--f-head);font-weight:500;font-size:17px;letter-spacing:.06em}
+.rows span.s{display:block;font-size:13.5px;color:var(--muted)}
+.amt{font-family:var(--f-head);font-weight:600;font-size:21px;white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right}
+.amt small{font-family:var(--f-body);font-weight:500;font-size:12.5px;display:block;color:var(--muted)}
+.plan-body{display:grid;grid-template-columns:1fr 112px;gap:14px;padding:6px 20px 20px;align-items:start}
+.plan-body .photo{aspect-ratio:1/1;border-radius:10px}
+.checks{list-style:none;margin:8px 0 0;padding:0;font-size:15px}
+.checks li::before{content:"✓";color:var(--gold-text);margin-right:8px}
+.fine{padding:0 20px 18px;font-size:13.5px;color:var(--muted);display:grid;gap:2px}
+.steps{list-style:none;margin:36px 0 0;padding:0;display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.steps li{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:16px 12px;display:grid;justify-items:center;gap:6px;text-align:center;font-size:14.5px;line-height:1.6}
+.steps .no{font-family:var(--f-latin);font-size:17px;color:var(--gold-text);letter-spacing:.1em}
+.steps svg{width:30px;height:30px}
+.welcome{margin-top:22px;text-align:center;font-family:var(--f-head);line-height:2.05}
 
 /* ⑦ アクセス・FAQ・お問い合わせ */
-.info{display:grid;gap:28px}
-.info h3{font-size:20px;margin-bottom:12px;display:flex;align-items:center;gap:10px}
-.dl{display:grid;grid-template-columns:5.5em 1fr;gap:8px 12px;margin:0}
-.dl dt{color:var(--muted)}
-.dl dd{margin:0}
+.info{display:grid;gap:36px}
+.info h3{font-size:20px;letter-spacing:.1em;margin-bottom:14px}
+.access-photo{aspect-ratio:260/187;margin-top:14px}
+.addr{font-size:15.5px;display:grid;gap:4px}
 details{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:0 16px;margin-bottom:10px}
 summary{cursor:pointer;padding:14px 0;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:10px}
 summary::-webkit-details-marker{display:none}
 summary::after{content:"＋";color:var(--gold-text);font-weight:400}
 details[open] summary::after{content:"－"}
-details p{margin:0 0 14px}
-.sns{display:grid;gap:10px}
+details p{padding-bottom:14px;font-size:15px}
+.contact{display:grid;gap:10px}
+.mail{font-size:15px;background:var(--white);border:1px solid var(--line);border-radius:8px;padding:12px 14px;word-break:break-all}
+.mail span{display:block;font-size:13px;color:var(--muted)}
+
+/* 締めの帯 */
+.closing{display:grid;grid-template-columns:1fr;gap:0;background:var(--white);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.closing .photo{aspect-ratio:277/187;border-radius:0}
+.closing div.t{padding:22px 20px;font-family:var(--f-head);line-height:2.05;font-size:15.5px}
+.closing div.t b{display:block;font-weight:500;font-size:17px;margin-bottom:6px}
 
 /* フッター */
-.s-foot{border-top:1px solid var(--line);padding-block:36px 110px;text-align:center;font-size:14px;color:var(--muted)}
-.s-foot nav{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 20px;margin-bottom:16px}
+.s-foot{border-top:1px solid var(--line);padding-block:40px 28px;text-align:center;font-size:14px;color:var(--muted)}
+.foot-logo{width:120px;margin:0 auto 6px;mix-blend-mode:multiply;-webkit-mask-image:radial-gradient(ellipse 70% 70% at 50% 50%,#000 62%,transparent 98%);mask-image:radial-gradient(ellipse 70% 70% at 50% 50%,#000 62%,transparent 98%)}
+.s-foot .tagline{font-family:var(--f-head);color:var(--brown);letter-spacing:.12em;margin-bottom:18px}
+.s-foot nav{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 20px;margin-bottom:14px}
 .s-foot a{color:var(--brown)}
 
-/* スマホ下部の固定ボタン */
-.dock{position:sticky;bottom:0;z-index:6;background:rgba(250,247,242,.97);border-top:1px solid var(--line);padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.dock .btn{min-height:48px;padding:8px 10px;font-size:15px}
+.about,.info,.reserve,.plans,.prods{grid-template-columns:minmax(0,1fr)}
+/* スマホ下部の固定ボタン：予約・購入ボタンがある場所では隠す */
+.dock{position:sticky;bottom:0;z-index:6;background:var(--ivory);border-top:1px solid var(--line);box-shadow:0 -4px 14px rgba(73,55,41,.06);padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:1fr 1fr;gap:10px;visibility:hidden;transform:translateY(100%);transition:transform .2s ease,visibility .2s}
+.dock.show{visibility:visible;transform:none}
+.dock .btn{min-height:46px;padding:8px 10px;font-size:15px}
 
 /* ===== パソコン幅 ===== */
 @container site (min-width: 860px){
   .wrap{padding-inline:40px}
   .s-head .wrap{height:76px}
-  .logo-mark{font-size:30px}
+  .logo-word img{height:36px}
   .menu-btn{display:none}
-  .s-nav{display:flex;align-items:center;gap:26px;font-size:15px}
+  .s-nav{display:flex;align-items:center;gap:24px;font-size:15px}
   .s-nav a{text-decoration:none}
-  .s-nav a:hover{text-decoration:underline;text-decoration-color:var(--gold);text-underline-offset:6px}
+  .s-nav a:not(.btn):hover{text-decoration:underline;text-decoration-color:var(--gold);text-underline-offset:6px}
   .site{font-size:17px}
-  .hero{display:grid;grid-template-columns:1.1fr 1fr;min-height:620px}
-  .hero-photo{aspect-ratio:auto;order:2}
-  .hero-body{order:1;align-content:center;padding:60px 56px;text-align:left;justify-items:start}
-  .hero-copy{font-size:44px;line-height:1.55}
-  .hero-cta{grid-template-columns:1fr 1fr;max-width:520px}
-  .sec{padding-block:96px}
-  .sec-title{margin-bottom:52px}
-  .sec-title h2{font-size:32px}
-  .about{grid-template-columns:1fr 2fr;gap:56px;max-width:960px;margin:0 auto}
-  .about-art{width:240px}
-  .grid-6{grid-template-columns:repeat(3,1fr);gap:28px}
-  .grid-3{grid-template-columns:repeat(3,1fr);gap:28px}
-  .sched{gap:0;background:var(--white);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-  .ev{border:0;border-bottom:1px solid var(--line);border-radius:0;grid-template-columns:96px 1fr auto;padding:18px 24px}
-  .ev:last-child{border-bottom:0}
-  .ev-date{grid-row:auto}
-  .ev-info{display:grid;gap:4px}
-  .ev-foot{grid-column:auto;border:0;margin:0;padding:0;gap:24px}
-  .pf{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
-  .flow{margin-top:0}
-  .info{grid-template-columns:1fr 1.3fr 1fr;gap:40px}
+  .hero{padding-block:56px 40px}
+  .hero-grid{grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);gap:48px;align-items:center}
+  .hero-logo{width:230px}
+  .hero-copy{font-size:32px}
+  .hero-cta{grid-template-columns:1fr 1fr;max-width:500px}
+  .hero-photo{margin-inline:0;border-radius:16px}
+  .sec{padding-block:92px}
+  .sec-title{margin-bottom:34px}
+  .sec-title h2{font-size:31px}
+  .about{grid-template-columns:1.1fr 300px 80px;gap:48px;max-width:980px;margin:0 auto}
+  .about-photo{aspect-ratio:auto;height:560px}
+  .branch{width:80px;align-self:end}
+  .acts{grid-template-columns:repeat(3,1fr);gap:44px 28px}
+  .act{display:block;border:0;padding:0;text-align:center}
+  .act .photo{width:100%;height:auto;aspect-ratio:2/1;border-radius:12px;overflow:visible}
+  .act .photo img{border-radius:12px}
+  .act .badge{display:grid;place-items:center;position:absolute;left:14px;bottom:-24px;width:56px;height:56px;border-radius:50%;background:var(--ivory);border:1px solid var(--line);color:var(--brown)}
+  .act .badge svg{width:28px;height:28px}
+  .act h3{margin-top:34px;margin-bottom:8px;font-size:20px}
+  .act p{font-size:15.5px}
+  .rec-list{grid-template-columns:repeat(6,1fr)}
+  .recommend{padding:30px 28px}
+  .reserve{grid-template-columns:repeat(3,1fr);gap:24px}
+  .rv{grid-template-rows:auto auto 1fr auto;padding:24px}
+  .rv .btn{align-self:end}
+  .prods{grid-template-columns:repeat(3,1fr);gap:24px}
+  .plans{grid-template-columns:1fr 1fr;gap:28px}
+  .steps{grid-template-columns:repeat(4,1fr)}
+  .info{grid-template-columns:1.1fr 1.3fr 1fr;gap:44px}
+  .closing{grid-template-columns:320px 1fr}
+  .closing .photo{aspect-ratio:auto;height:100%}
+  .closing div.t{padding:34px 40px;align-self:center}
   .dock{display:none}
-  .s-foot{padding-block:44px}
 }
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 </style>
 
-<div class="board">
+<!-- 線画アイコン（リーフレットの細い線のアイコンを参考に作成） -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 0l1.6 9.2L24 12l-10.4 2.8L12 24l-1.6-9.2L0 12l10.4-2.8z" fill="currentColor"/><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width=".8"/></symbol>
+    <symbol id="i-yoga" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.5" r="2"/><path d="M12 7.5v6M12 9.5c-2 1.5-3.5 2.5-5.5 2.5M12 9.5c2 1.5 3.5 2.5 5.5 2.5M5 19c2-2.2 4.4-3.2 7-3.2s5 1 7 3.2M9 17.2l3 2.3 3-2.3"/></symbol>
+    <symbol id="i-lotus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"><path d="M12 4.5c2.2 3 2.2 7.5 0 11.5c-2.2-4-2.2-8.5 0-11.5z"/><path d="M12 16c-3.2-1-6-4.2-6.2-8.2c3.3.3 5.5 3.4 6.2 8.2zM12 16c3.2-1 6-4.2 6.2-8.2c-3.3.3-5.5 3.4-6.2 8.2z"/><path d="M12 16c-3.6.3-6.8-1-9-3.4c3.6-.8 6.8.6 9 3.4zM12 16c3.6.3 6.8-1 9-3.4c-3.6-.8-6.8.6-9 3.4z"/></symbol>
+    <symbol id="i-bowl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"><ellipse cx="11" cy="9" rx="8" ry="1.8"/><path d="M3 9c0 5 3.6 8.5 8 8.5s8-3.5 8-8.5M8 19.5h6"/><path d="M17.5 14.5l4.5 3"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"><path d="M3 5.5c3.3-1 6-.6 9 1.5v12c-3-2-5.7-2.5-9-1.5zM21 5.5c-3.3-1-6-.6-9 1.5v12c3-2 5.7-2.5 9-1.5z"/><path d="M12 9.5v4" stroke-linecap="round"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"><path d="M13 3.5a8.5 8.5 0 1 0 7.5 12.3A7.2 7.2 0 0 1 13 3.5z"/><path d="M18 4v3.4M16.3 5.7h3.4M20.5 9.5v2M19.5 10.5h2"/></symbol>
+    <symbol id="i-people" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><circle cx="16.5" cy="9" r="2.6"/><path d="M2.8 19.5c.4-3.8 3-6 6.2-6s5.8 2.2 6.2 6M14.8 14c3.2-.6 6 1.3 6.4 5.5"/></symbol>
+    <symbol id="i-leaf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"><path d="M5 20C4.6 11 10 4.8 19.5 4c.6 9.5-5.6 15.5-14.5 16z"/><path d="M5 20l9.5-10.5M9.5 15H13M12 12.2v-3"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+    <symbol id="i-wind" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"><path d="M3 9h10.5a2.8 2.8 0 1 0-2.8-2.8M3 13h14a3 3 0 1 1-3 3M3 17h6"/></symbol>
+    <symbol id="i-music" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"><path d="M9 18V6.5l10-2.3v11.5"/><circle cx="6.8" cy="18" r="2.2"/><circle cx="16.8" cy="15.7" r="2.2"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"><path d="M12 20s-7.5-4.6-7.5-10.2A4.1 4.1 0 0 1 12 7.4a4.1 4.1 0 0 1 7.5 2.4C19.5 15.4 12 20 12 20z"/></symbol>
+    <symbol id="i-cup" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"><path d="M4 8h13v4.5a6.5 6.5 0 0 1-13 0z"/><path d="M17 9.5h1.5a2.5 2.5 0 0 1 0 5H17"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4M7.5 13h1M11.5 13h1M15.5 13h1M7.5 16.5h1M11.5 16.5h1"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"><path d="M5 3.5h10l4 4v13H5z"/><path d="M8.5 10h7M8.5 13.5h7M8.5 17h4" stroke-linecap="round"/></symbol>
+    <symbol id="i-bag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"><path d="M5 8h14l-1 12H6z"/><path d="M9 8a3 3 0 0 1 6 0" stroke-linecap="round"/></symbol>
+  </defs>
+</svg>
+
+<div class="board" id="board">
   <header class="board-head">
-    <h1>Arcis トップページ デザイン見本</h1>
-    <p>スマートフォン版（左）とパソコン版（右）です。同じページが画面幅に合わせて組み替わります。枠の中はスクロールできます。</p>
+    <div>
+      <h1>Arcis トップページ デザイン見本（第2版）</h1>
+      <p>スマートフォン版（左）とパソコン版（右）。枠の中はスクロールできます。点線の枠と「確認用」の印は、公開前に確定・削除する箇所です。</p>
+    </div>
+    <label class="toggle" for="t-public"><input type="checkbox" id="t-public"> 確認用の印を隠して公開時の見え方にする</label>
   </header>
-  <p class="notice"><strong>リーフレット画像は受け取れていません。</strong>色・写真・装飾はご指示文の記載のみを根拠にしています。ロゴ・紹介文・料金・日程・商品・住所・SNSのリンク先はすべて仮置きで、「仮」の印をつけています。写真部分は色と線画による代用で、実際の写真ではありません。</p>
 
   <div class="frames">
     <section class="frame-sp" aria-label="スマートフォン版">
@@ -245,48 +306,40 @@ details p{margin:0 0 14px}
       <p class="frame-label">パソコン版（幅 1280px を縮小表示）</p>
       <div class="device">
         <div class="bar"><i></i><i></i><i></i></div>
-        <div class="scaler"><div class="viewport fit" data-slot></div></div>
+        <div class="scaler"><div class="viewport" data-slot></div></div>
       </div>
     </section>
   </div>
 
   <div class="notes">
     <section class="note">
-      <h2>リーフレットから引き継いだ点（ご指示文に基づく）</h2>
+      <h2>リーフレットから反映したこと</h2>
       <ul>
-        <li>表紙のコピー「まっすぐな光、自分に還る時間」をメインコピーに使用</li>
-        <li>表紙の「山並みと柔らかな日差し」をメイン写真の構図に（写真差し替え前提）</li>
-        <li>見出し下の「細い金線＋小さな星」を全セクション共通の見出し飾りに</li>
-        <li>蓮・花曼荼羅・月・星の細い線画を、写真の代わりと余白の飾りに控えめに使用</li>
-        <li>アイボリー地・ゴールドの線・深いブラウンの文字、ゆったりした余白</li>
-        <li>中面の6項目（ヨガ〜お話会）をカードで紹介。PCは3列、スマホは1列</li>
+        <li>表紙：ロゴ（切り出しのみで描き変えなし）、コピー、4つのプログラム名の英字表記、紹介文</li>
+        <li>2枚目：「Arcisとは」の文章と和室の写真、細い草花の線画、丸い写真を並べた一覧（スマホ版に採用）</li>
+        <li>3枚目：6項目の写真カードと、写真の左下に重なる丸いアイコン（パソコン版に採用）、「こんな方におすすめです」、締めの一文</li>
+        <li>4枚目：料金表の構成（体験・月会員・年間講座・オンライン）、「人気No.1」の丸印、ご入会までの流れ、アクセス、連絡先</li>
+        <li>全体：細い金線＋星の見出し飾り、字間を広めにとった明朝の見出し、角を丸めた写真と淡いベージュの囲み</li>
       </ul>
     </section>
     <section class="note">
-      <h2>使いやすさのために決めたこと</h2>
+      <h2>写真とロゴについて</h2>
       <ul>
-        <li>予約・購入ボタンは深いブラウン地に白文字。スマホでは画面下に常に表示</li>
-        <li>ゴールドは線と飾りだけ。小さな金色文字は濃いめの金 #7E5D2B にして読みやすく</li>
-        <li>本文はスマホ16px・PC17px。日付・料金・残席はゴシック体で太く、桁をそろえる</li>
-        <li>残席は色だけでなく「残り3席」「満席」と文字でも表示。満席は押せないボタンに</li>
-        <li>Squareの画面へ移る前に「移動先と目的」「支払い完了で予約成立」を明記</li>
-        <li>動きのある演出は入れていません</li>
+        <li>写真はリーフレット画像からの切り出しです。解像度が低いため、<b>本番では元の写真データ</b>が必要です</li>
+        <li>すべての写真に「イメージ」と表示しています。<b>実際の教室・講師の写真</b>がどれか教えてください（その写真だけ表示を外します）</li>
+        <li>ロゴは表紙から切り出して、形と縦横比をそのまま使っています。ヘッダーには「Arcis」の文字部分だけを使っています。この使い方でよいか確認させてください</li>
+        <li>商品の写真はリーフレットにないため、写真枠は空けたままです（別の写真を商品に見せかけないため）</li>
       </ul>
     </section>
     <section class="note">
-      <h2>色（仮の近似色）と書体候補</h2>
-      <div class="swatches">
-        <div class="sw"><b style="background:#FAF7F2"></b><span>背景 #FAF7F2</span></div>
-        <div class="sw"><b style="background:#F1E9DE"></b><span>補助背景 #F1E9DE</span></div>
-        <div class="sw"><b style="background:#B78B45"></b><span>装飾 #B78B45</span></div>
-        <div class="sw"><b style="background:#493729"></b><span>本文 #493729</span></div>
-        <div class="sw"><b style="background:#DED0BB"></b><span>罫線 #DED0BB</span></div>
-        <div class="sw"><b style="background:#7E5D2B"></b><span>金文字 #7E5D2B（追加）</span></div>
-      </div>
-      <ul style="margin-top:12px">
-        <li>見出し：しっぽり明朝（候補：Zen Old Mincho）</li>
-        <li>本文・料金・ボタン：Zen Kaku Gothic New</li>
-        <li>欧文（ARCIS・英字見出し）：Cormorant Garamond</li>
+      <h2>確認が必要な項目</h2>
+      <ul>
+        <li><span class="k">料金</span>リーフレット記載の金額が現行か</li>
+        <li><span class="k">予約</span>月会員・ポイントの方式が決まるまで、予約成立の説明文は仮</li>
+        <li><span class="k">残席・在庫</span>自動で最新にできるまで、数字は出さず「空き状況を確認する」「在庫を確認する」の入口にしています</li>
+        <li><span class="k">体験</span>リーフレットでは「LINEまたはInstagramのDMで予約」。オンライン予約に一本化するか</li>
+        <li><span class="k">LINE</span>リーフレットのQRコードは画像から読み取れませんでした。正式なURLを教えてください（印刷物のQRが読めるかもご確認ください）</li>
+        <li><span class="k">Instagram</span>@arcis.yoga のURLを確認のうえリンクします</li>
       </ul>
     </section>
   </div>
@@ -296,17 +349,14 @@ details p{margin:0 0 14px}
 <div class="site">
   <header class="s-head">
     <div class="wrap">
-      <a class="logo" href="#top" aria-label="Arcis トップ">
-        <span class="logo-mark">ARCIS</span><small>ロゴ仮置き</small>
-      </a>
+      <a class="logo-word" href="#top" aria-label="Arcis トップへ"><img src="assets/wordmark.png" alt="Arcis" width="375" height="112"></a>
       <nav class="s-nav" aria-label="メインメニュー">
-        <a href="#about">Arcisについて</a>
-        <a href="#lessons">レッスン</a>
-        <a href="#schedule">日程・予約</a>
-        <a href="#shop">商品</a>
+        <a href="#about">Arcisとは</a>
+        <a href="#programs">できること</a>
         <a href="#price">料金</a>
+        <a href="#shop">商品</a>
         <a href="#access">アクセス</a>
-        <a class="btn btn-primary btn-small" href="#schedule">レッスンを予約する</a>
+        <a class="btn btn-primary btn-small" href="#reserve">レッスンを予約する</a>
       </nav>
       <button class="menu-btn" type="button" aria-label="メニューを開く"><span></span><span></span><span></span></button>
     </div>
@@ -315,210 +365,267 @@ details p{margin:0 0 14px}
   <main>
     <!-- ① メインビジュアル -->
     <section class="hero">
-      <div class="hero-photo" role="img" aria-label="山並みと柔らかな日差しのイメージ（仮）">
-        <svg class="mtn" viewBox="0 0 400 230" preserveAspectRatio="none" aria-hidden="true">
-          <path d="M0 150 L60 110 L105 132 L170 70 L230 118 L280 92 L340 128 L400 100 L400 230 L0 230Z" fill="#E3D3BA"/>
-          <path d="M0 185 L70 150 L130 170 L200 128 L260 162 L320 140 L400 170 L400 230 L0 230Z" fill="#D8C5A8"/>
-          <path d="M0 210 L90 186 L160 200 L240 176 L310 196 L400 184 L400 230 L0 230Z" fill="#CDB794"/>
-          <path d="M170 70 L230 118 L280 92" fill="none" stroke="#B78B45" stroke-width=".8" opacity=".7"/>
-        </svg>
-        <span class="ph-label">イメージ写真（仮）：山並みと柔らかな日差し／実際の写真に差し替え</span>
-      </div>
-      <div class="hero-body">
-        <svg class="moon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
-          <path d="M30 8a16 16 0 1 0 10 28A14 14 0 0 1 30 8z"/>
-          <path d="M36 12l.8 2.4 2.4.8-2.4.8-.8 2.4-.8-2.4-2.4-.8 2.4-.8z"/>
-        </svg>
-        <h1 class="hero-copy"><span>まっすぐな光、</span><span>自分に還る時間</span></h1>
-        <p class="hero-lead"><span class="tmp">仮の紹介文</span> <span class="tmp-text">自然光の入る空間で、ヨガや音、花の時間を通して、自分に還るひとときを。（リーフレットの文章をいただいたら差し替えます）</span></p>
-        <div class="hero-cta">
-          <a class="btn btn-primary" href="#schedule">レッスンを予約する <span class="arrow">›</span></a>
-          <a class="btn btn-outline" href="#shop">商品を見る <span class="arrow">›</span></a>
+      <div class="wrap hero-grid">
+        <div class="hero-body">
+          <img class="hero-logo" src="assets/logo.png" alt="Arcis ロゴ" width="530" height="560">
+          <h1 class="hero-copy"><span>まっすぐな光、</span><span>自分に還る時間</span></h1>
+          <p class="progs"><span>Yoga</span><i>·</i><span>Crystal Bowl</span><i>·</i><span>Flower Mandala</span><i>·</i><span>Yoga Philosophy</span></p>
+          <p class="hero-lead">心と身体を整え、暮らしそのものを整える場所。<br>あなたの中には、いつもまっすぐな光があります。<br>その光を思い出す時間を、Arcisで。</p>
+          <div class="hero-cta" data-hide-dock>
+            <a class="btn btn-primary" href="#reserve">レッスンを予約する</a>
+            <a class="btn btn-outline" href="#shop">商品を見る</a>
+          </div>
         </div>
+        <div class="photo hero-photo"><img src="assets/hero.jpg" alt="木のテーブルに置かれたクリスタルボウルと白い蓮の花、遠くに山並み" width="678" height="385"><span class="img-note">イメージ</span></div>
       </div>
     </section>
 
-    <!-- ② Arcisについて -->
+    <!-- ② Arcisとは -->
     <section class="sec" id="about">
       <div class="wrap">
-        <div class="sec-title"><span class="en">About</span><h2>Arcisについて</h2><span class="rule"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 0l1.2 4.8L12 6 7.2 7.2 6 12 4.8 7.2 0 6l4.8-1.2z" fill="currentColor"/></svg></span></div>
+        <div class="sec-title"><h2><span class="lat">Arcis</span>とは</h2><span class="rule"><svg><use href="#i-star"/></svg></span></div>
         <div class="about">
-          <svg class="about-art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width=".8" aria-hidden="true">
-            <circle cx="60" cy="60" r="56"/><circle cx="60" cy="60" r="12"/>
-            <g><ellipse cx="60" cy="32" rx="9" ry="18"/><ellipse cx="60" cy="88" rx="9" ry="18"/><ellipse cx="32" cy="60" rx="18" ry="9"/><ellipse cx="88" cy="60" rx="18" ry="9"/></g>
-            <g transform="rotate(45 60 60)"><ellipse cx="60" cy="32" rx="9" ry="18"/><ellipse cx="60" cy="88" rx="9" ry="18"/><ellipse cx="32" cy="60" rx="18" ry="9"/><ellipse cx="88" cy="60" rx="18" ry="9"/></g>
-          </svg>
-          <div>
-            <p><span class="tmp">原稿待ち</span></p>
-            <p class="tmp-text">ここにリーフレット2枚目の紹介文（教室の考え方）を掲載します。原稿をいただくまでは、文章量の目安として仮の文を置いています。</p>
-            <p class="tmp-text">講師のプロフィールと写真は「講師紹介」ページに分けて掲載する予定です。実際の教室・講師の写真には「教室の様子」、イメージ写真には「イメージ」と表示して区別します。</p>
+          <div class="about-text">
+            <p class="first">大地の恵み、花の美しさ、<br>音の響き、祈りの時間。</p>
+            <p>すべては、自分の中にある<br>まっすぐな光に還るために。</p>
+            <p>ヨガを通して心と身体を整え、花や音、自然とつながり、日々の暮らしそのものをやさしく整えていく。</p>
+            <p>Arcisは、あなたの「祈りのある暮らし」を応援します。</p>
           </div>
+          <div class="photo about-photo"><img src="assets/washitsu.jpg" alt="自然光が差し込む和室。障子と植物、クリスタルボウル" width="259" height="609"><span class="img-note">イメージ</span></div>
+          <img class="branch" src="assets/branch.png" alt="" width="122" height="225">
         </div>
       </div>
     </section>
 
     <!-- ③ Arcisでできること -->
-    <section class="sec sec-alt" id="lessons">
+    <section class="sec sec-alt" id="programs">
       <div class="wrap">
-        <div class="sec-title"><span class="en">Lessons</span><h2>Arcisでできること</h2><span class="rule"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 0l1.2 4.8L12 6 7.2 7.2 6 12 4.8 7.2 0 6l4.8-1.2z" fill="currentColor"/></svg></span></div>
-        <div class="grid-6">
-          <article class="card">
-            <div class="ph ph-1"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true"><path d="M32 12c6 8 6 20 0 30c-6-10-6-22 0-30z"/><path d="M32 42c-8-3-15-11-16-21c8 1 14 9 16 21z"/><path d="M32 42c8-3 15-11 16-21c-8 1-14 9-16 21z"/><path d="M32 42c-10 0-19-4-25-11c10-2 19 2 25 11z"/><path d="M32 42c10 0 19-4 25-11c-10-2-19 2-25 11z"/><path d="M14 50h36"/></svg><span class="ph-label">イメージ写真（仮）：木の床・自然光</span></div>
-            <div class="card-body"><h3>ヨガ</h3><p class="tmp-text">呼吸と動きで、からだと心をととのえる時間。（説明文は仮）</p><a class="more" href="#schedule">日程を見る ›</a></div>
-          </article>
-          <article class="card">
-            <div class="ph ph-2"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true"><circle cx="32" cy="32" r="28"/><circle cx="32" cy="32" r="6"/><ellipse cx="32" cy="18" rx="5" ry="9"/><ellipse cx="32" cy="46" rx="5" ry="9"/><ellipse cx="18" cy="32" rx="9" ry="5"/><ellipse cx="46" cy="32" rx="9" ry="5"/><g transform="rotate(45 32 32)"><ellipse cx="32" cy="18" rx="5" ry="9"/><ellipse cx="32" cy="46" rx="5" ry="9"/><ellipse cx="18" cy="32" rx="9" ry="5"/><ellipse cx="46" cy="32" rx="9" ry="5"/></g></svg><span class="ph-label">イメージ写真（仮）：白い花・花曼荼羅</span></div>
-            <div class="card-body"><h3>花曼荼羅</h3><p class="tmp-text">花や葉を円く並べ、無心になるひととき。（説明文は仮）</p><a class="more" href="#schedule">日程を見る ›</a></div>
-          </article>
-          <article class="card">
-            <div class="ph ph-3"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true"><path d="M10 30h44c0 12-10 20-22 20S10 42 10 30z"/><ellipse cx="32" cy="30" rx="22" ry="4"/><path d="M22 18c2-3 2-6 0-9M32 16c2-3 2-6 0-9M42 18c2-3 2-6 0-9"/><path d="M18 56h28"/></svg><span class="ph-label">イメージ写真（仮）：クリスタルボウル・和室</span></div>
-            <div class="card-body"><h3>クリスタルボウル</h3><p class="tmp-text">澄んだ音の響きに身をゆだねる時間。（説明文は仮）</p><a class="more" href="#schedule">日程を見る ›</a></div>
-          </article>
-          <article class="card">
-            <div class="ph ph-4"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true"><path d="M12 16c8-2 14-1 20 3v34c-6-4-12-5-20-3z"/><path d="M52 16c-8-2-14-1-20 3v34c6-4 12-5 20-3z"/><path d="M46 6l.8 2.4 2.4.8-2.4.8-.8 2.4-.8-2.4-2.4-.8 2.4-.8z"/></svg><span class="ph-label">イメージ写真（仮）</span></div>
-            <div class="card-body"><h3>ヨガ哲学</h3><p class="tmp-text">ヨガの考え方を、日々の暮らしに。（説明文は仮）</p><a class="more" href="#schedule">日程を見る ›</a></div>
-          </article>
-          <article class="card">
-            <div class="ph ph-5"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true"><path d="M38 10a20 20 0 1 0 16 30A17 17 0 0 1 38 10z"/><path d="M16 14l.8 2.4 2.4.8-2.4.8-.8 2.4-.8-2.4-2.4-.8 2.4-.8zM24 6l.6 1.8 1.8.6-1.8.6-.6 1.8-.6-1.8-1.8-.6 1.8-.6z"/></svg><span class="ph-label">イメージ写真（仮）</span></div>
-            <div class="card-body"><h3>ヨガニードラ</h3><p class="tmp-text">横になったまま、深い休息へ導く瞑想。（説明文は仮）</p><a class="more" href="#schedule">日程を見る ›</a></div>
-          </article>
-          <article class="card">
-            <div class="ph ph-6"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true"><circle cx="20" cy="26" r="6"/><circle cx="44" cy="26" r="6"/><circle cx="32" cy="20" r="6"/><path d="M10 48c0-8 5-14 10-14s10 6 10 14M34 48c0-8 5-14 10-14s10 6 10 14M22 42c1-8 5-13 10-13s9 5 10 13"/></svg><span class="ph-label">イメージ写真（仮）</span></div>
-            <div class="card-body"><h3>お話会・コミュニティ</h3><p class="tmp-text">語り合い、つながる場。（説明文は仮）</p><a class="more" href="#schedule">日程を見る ›</a></div>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- ④ 開催予定・レッスン予約 -->
-    <section class="sec" id="schedule">
-      <div class="wrap">
-        <div class="sec-title"><span class="en">Schedule</span><h2>開催予定・レッスン予約</h2><span class="rule"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 0l1.2 4.8L12 6 7.2 7.2 6 12 4.8 7.2 0 6l4.8-1.2z" fill="currentColor"/></svg></span><span class="tmp">日程・料金・残席はすべて表示例です</span></div>
-        <ul class="sched">
-          <li class="ev">
-            <div class="ev-date"><div class="m">10月</div><div class="d">12</div><div class="w">日</div></div>
-            <div class="ev-info"><div class="ev-title">ヨガ</div><div class="ev-meta"><span>10:00–11:15</span><span class="mode">対面</span><span class="price">¥0,000</span><span class="tmp">仮</span></div></div>
-            <div class="ev-foot"><span class="seat">残り 3 席</span><a class="btn btn-primary btn-small" href="#schedule">予約する ›</a></div>
+        <div class="sec-title"><h2><span class="lat">Arcis</span>でできること</h2><span class="rule"><svg><use href="#i-star"/></svg></span></div>
+        <p class="sec-lead">心と身体を整え、暮らしそのものを豊かにしていく時間。Arcisでは、さまざまなプログラムをご用意しています。</p>
+        <ul class="acts">
+          <li class="act">
+            <div class="photo"><img src="assets/yoga.jpg" alt="窓辺で両手を上に伸ばすヨガのポーズ" width="247" height="128"><span class="badge"><svg><use href="#i-yoga"/></svg></span></div>
+            <div><h3>ヨガ</h3><p>呼吸を深め、心と身体を整えます。初心者の方も安心してご参加いただけます。</p></div>
           </li>
-          <li class="ev">
-            <div class="ev-date"><div class="m">10月</div><div class="d">15</div><div class="w">水</div></div>
-            <div class="ev-info"><div class="ev-title">ヨガニードラ</div><div class="ev-meta"><span>20:00–21:00</span><span class="mode mode-online">オンライン</span><span class="price">¥0,000</span><span class="tmp">仮</span></div></div>
-            <div class="ev-foot"><span class="seat">残り 8 席</span><a class="btn btn-primary btn-small" href="#schedule">予約する ›</a></div>
+          <li class="act">
+            <div class="photo"><img src="assets/mandala.jpg" alt="白い花を中心に花びらを円く並べた花曼荼羅" width="245" height="128"><span class="badge"><svg><use href="#i-lotus"/></svg></span></div>
+            <div><h3>花曼荼羅</h3><p>花を通して心を整え、美と調和を感じる時間。季節の花で曼荼羅をつくります。</p></div>
           </li>
-          <li class="ev">
-            <div class="ev-date"><div class="m">10月</div><div class="d">19</div><div class="w">日</div></div>
-            <div class="ev-info"><div class="ev-title">クリスタルボウル</div><div class="ev-meta"><span>14:00–15:00</span><span class="mode">対面</span><span class="price">¥0,000</span><span class="tmp">仮</span></div></div>
-            <div class="ev-foot"><span class="seat seat-full">満席</span><span class="btn btn-small" aria-disabled="true">満席のため受付終了</span></div>
+          <li class="act">
+            <div class="photo"><img src="assets/bowl.jpg" alt="透明なクリスタルボウル" width="254" height="128"><span class="badge"><svg><use href="#i-bowl"/></svg></span></div>
+            <div><h3>クリスタルボウル</h3><p>澄んだ音の波動が、深いリラクゼーションへと導き、心の奥に静けさを届けます。</p></div>
           </li>
-          <li class="ev">
-            <div class="ev-date"><div class="m">10月</div><div class="d">26</div><div class="w">日</div></div>
-            <div class="ev-info"><div class="ev-title">花曼荼羅</div><div class="ev-meta"><span>13:00–15:00</span><span class="mode">対面</span><span class="price">¥0,000</span><span class="tmp">仮</span></div></div>
-            <div class="ev-foot"><span class="seat seat-few">残り 1 席</span><a class="btn btn-primary btn-small" href="#schedule">予約する ›</a></div>
+          <li class="act">
+            <div class="photo"><img src="assets/philosophy.jpg" alt="開いた本と金色の草花" width="247" height="115"><span class="badge"><svg><use href="#i-book"/></svg></span></div>
+            <div><h3>ヨガ哲学</h3><p>古代から伝わる智慧を、日々の暮らしに活かす学びの時間。心が軽くなるヒントが見つかります。</p></div>
+          </li>
+          <li class="act">
+            <div class="photo"><img src="assets/nidra.jpg" alt="横になって休む女性とキャンドル" width="247" height="115"><span class="badge"><svg><use href="#i-moon"/></svg></span></div>
+            <div><h3>ヨガニードラ</h3><p>「眠るヨガ」とも呼ばれる深い休息法。がんばりすぎている心と身体をやさしくゆるめます。</p></div>
+          </li>
+          <li class="act">
+            <div class="photo"><img src="assets/community.jpg" alt="座布団と低いテーブルが置かれた明るい部屋" width="254" height="115"><span class="badge"><svg><use href="#i-people"/></svg></span></div>
+            <div><h3>お話会・コミュニティ</h3><p>同じ想いを持つ方々とつながり、人生や哲学について語り合う温かな時間です。</p></div>
           </li>
         </ul>
-        <div class="sched-foot">
-          <div class="box-note"><strong>予約ボタンを押すと、Square（スクエア）の予約画面に移動します。</strong>お名前・連絡先の入力とお支払いをSquareの画面で行い、<strong style="display:inline">お支払いが完了した時点で予約成立</strong>です。確認メールが届きます。残席は予約画面の表示が最新です。</div>
-          <a class="btn btn-outline" href="#schedule">すべての日程を見る ›</a>
-          <a class="more" href="#contact" style="font-weight:700">個別レッスンのご相談はこちら ›</a>
+        <p class="sec-photo-note">写真はイメージです。</p>
+
+        <div class="recommend">
+          <h3>こんな方におすすめです</h3>
+          <ul class="rec-list">
+            <li><svg><use href="#i-leaf"/></svg>最近疲れやすい</li>
+            <li><svg><use href="#i-clock"/></svg>自分の時間が<br>なかなか取れない</li>
+            <li><svg><use href="#i-wind"/></svg>呼吸が浅いと<br>感じる</li>
+            <li><svg><use href="#i-lotus"/></svg>自然や花が好き</li>
+            <li><svg><use href="#i-music"/></svg>音に癒されたい</li>
+            <li><svg><use href="#i-heart"/></svg>自分を大切にする<br>時間がほしい</li>
+          </ul>
         </div>
       </div>
     </section>
 
-    <!-- ⑤ 商品紹介 -->
+    <!-- ④ レッスンのご予約 -->
+    <section class="sec" id="reserve">
+      <div class="wrap">
+        <div class="sec-title"><h2>レッスンのご予約</h2><span class="rule"><svg><use href="#i-star"/></svg></span></div>
+        <p class="sec-lead">まずは体験レッスンへお越しください。<br>開催日時と空き状況は、予約画面でいつでも最新をご確認いただけます。</p>
+        <div class="reserve" data-hide-dock>
+          <article class="rv">
+            <div class="rv-top"><h3>体験レッスン</h3><span class="price">1,000<small>円（税込）</small><span class="dr">要確認</span></span></div>
+            <div class="tags"><span class="tag">はじめての方</span><span class="tag">グループ</span></div>
+            <p>はじめての方も安心してご参加いただけます。Arcisの空気感を感じてみてください。</p>
+            <a class="btn btn-primary" href="#reserve">空き状況を確認する</a>
+          </article>
+          <article class="rv">
+            <div class="rv-top"><h3>通常レッスン</h3></div>
+            <div class="tags"><span class="tag">対面</span><span class="tag">オンライン</span></div>
+            <p>ヨガ、クリスタルボウル、ヨガニードラなど。開催日ごとの内容と定員は予約画面でご覧いただけます。<span class="dr">1回参加の料金・会員の予約方法は検討中</span></p>
+            <a class="btn btn-primary" href="#reserve">空き状況を確認する</a>
+          </article>
+          <article class="rv drb">
+            <div class="rv-top"><h3>個別レッスン</h3><span class="dr">内容・料金は確定後に掲載</span></div>
+            <div class="tags"><span class="tag">1対1</span></div>
+            <p>ご希望に合わせた時間をご用意します。まずはお気軽にご相談ください。</p>
+            <a class="btn btn-outline" href="#contact">相談する</a>
+          </article>
+        </div>
+        <div class="flow-note">
+          <p class="go-note" style="font-size:14.5px;color:var(--brown)">「空き状況を確認する」を押すと、オンラインの予約画面に移動します。日時を選び、お名前・連絡先を入力してお申し込みください。お支払いはSquare（スクエア）の画面で安全に行われ、カード情報がArcisに保存されることはありません。</p>
+          <p class="drb" style="font-size:14px;color:var(--draft)"><span class="dr">確認用</span>予約成立のタイミング：体験・1回参加は「お支払い完了時」。月会員・ポイントでのご予約は、方式が決まってから記載します。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ⑤ 商品 -->
     <section class="sec sec-alt" id="shop">
       <div class="wrap">
-        <div class="sec-title"><span class="en">Shop</span><h2>商品紹介</h2><span class="rule"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 0l1.2 4.8L12 6 7.2 7.2 6 12 4.8 7.2 0 6l4.8-1.2z" fill="currentColor"/></svg></span><span class="tmp">商品は未確定のため仮表示です</span></div>
-        <div class="grid-3">
-          <article class="card prod">
-            <div class="ph ph-4"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true"><rect x="16" y="14" width="32" height="40" rx="3"/><path d="M24 14V8h16v6"/></svg><span class="ph-label">商品写真（仮）</span></div>
-            <div class="card-body"><h3>商品名 A（仮）</h3><div class="price">¥0,000 <small>税込</small> <span class="tmp">仮</span></div><div class="stock">在庫あり</div><a class="btn btn-primary btn-small" href="#shop" style="margin-top:8px">購入画面へ ›</a></div>
+        <div class="sec-title"><h2>商品のご案内</h2><span class="rule"><svg><use href="#i-star"/></svg></span></div>
+        <p class="sec-lead">暮らしの中で、Arcisの時間を感じていただけるものを。</p>
+        <div class="prods drb" data-hide-dock>
+          <article class="prod">
+            <div class="prod-ph"><svg><use href="#i-bag"/></svg></div>
+            <div><h3>商品名<span class="dr">未定</span></h3><p class="p">税込価格<span class="dr">未定</span></p><a class="btn btn-outline btn-small" href="#shop">在庫を確認する</a></div>
           </article>
-          <article class="card prod">
-            <div class="ph ph-2"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true"><circle cx="32" cy="34" r="18"/><path d="M32 16v-6M26 10h12"/></svg><span class="ph-label">商品写真（仮）</span></div>
-            <div class="card-body"><h3>商品名 B（仮）</h3><div class="price">¥0,000 <small>税込</small> <span class="tmp">仮</span></div><div class="stock">残りわずか</div><a class="btn btn-primary btn-small" href="#shop" style="margin-top:8px">購入画面へ ›</a></div>
+          <article class="prod">
+            <div class="prod-ph"><svg><use href="#i-bag"/></svg></div>
+            <div><h3>商品名<span class="dr">未定</span></h3><p class="p">税込価格<span class="dr">未定</span></p><a class="btn btn-outline btn-small" href="#shop">在庫を確認する</a></div>
           </article>
-          <article class="card prod">
-            <div class="ph ph-3"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true"><path d="M14 22h36l-4 30H18z"/><path d="M24 22c0-6 4-10 8-10s8 4 8 10"/></svg><span class="ph-label">商品写真（仮）</span></div>
-            <div class="card-body"><h3>商品名 C（仮）</h3><div class="price">¥0,000 <small>税込</small> <span class="tmp">仮</span></div><div class="stock stock-out">在庫切れ（入荷待ち）</div><span class="btn btn-small" aria-disabled="true" style="margin-top:8px">現在お求めいただけません</span></div>
+          <article class="prod">
+            <div class="prod-ph"><svg><use href="#i-bag"/></svg></div>
+            <div><h3>商品名<span class="dr">未定</span></h3><p class="p">税込価格<span class="dr">未定</span></p><a class="btn btn-outline btn-small" href="#shop">在庫を確認する</a></div>
           </article>
         </div>
-        <div class="sched-foot">
-          <div class="box-note"><strong>購入手続きは、Squareのオンラインショップ画面で行います。</strong>送料・お届け先の入力とお支払いはSquareの画面です。カード情報はArcisのサイトには保存されません。</div>
-          <a class="btn btn-outline" href="#shop">商品をすべて見る ›</a>
+        <div class="shop-foot">
+          <a class="btn btn-primary" href="#shop">オンラインショップを見る</a>
+          <p class="go-note">Square（スクエア）のオンラインショップに移動します。送料・お届け先の入力とお支払いはショップの画面で行います。</p>
         </div>
       </div>
     </section>
 
-    <!-- ⑥ 料金・参加までの流れ -->
+    <!-- ⑥ 料金・ご案内 -->
     <section class="sec" id="price">
       <div class="wrap">
-        <div class="sec-title"><span class="en">Price &amp; Flow</span><h2>料金・参加までの流れ</h2><span class="rule"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 0l1.2 4.8L12 6 7.2 7.2 6 12 4.8 7.2 0 6l4.8-1.2z" fill="currentColor"/></svg></span><span class="tmp">リーフレット4枚目の内容を確認後に掲載</span></div>
-        <div class="pf">
-          <div style="overflow-x:auto">
-            <table class="price-table">
-              <tbody>
-                <tr><th>体験レッスン<span class="sub">初めての方（仮）</span></th><td>¥0,000 <span class="tmp">仮</span></td></tr>
-                <tr><th>1回参加<span class="sub">各レッスン共通（仮）</span></th><td>¥0,000 <span class="tmp">仮</span></td></tr>
-                <tr><th>月会員<span class="sub">申込方法は検討中（自動課金の有無を確認中）</span></th><td>¥0,000 <span class="tmp">仮</span></td></tr>
-                <tr><th>年間講座<span class="sub">申込方法は検討中</span></th><td>¥0,000 <span class="tmp">仮</span></td></tr>
-                <tr><th>個別レッスン<span class="sub">日時はご相談（仮）</span></th><td>¥0,000 <span class="tmp">仮</span></td></tr>
-              </tbody>
-            </table>
-          </div>
-          <ol class="flow">
-            <li><div><b>日程を選ぶ</b><p>このページの「開催予定」から参加したい回を選びます。</p></div></li>
-            <li><div><b>Squareで予約・お支払い</b><p>お名前・連絡先を入力し、お支払いを済ませると予約成立です。</p></div></li>
-            <li><div><b>確認メールが届く</b><p>日時・場所（オンラインは参加方法）をご確認ください。</p></div></li>
-            <li><div><b>当日ご参加</b><p class="tmp-text">持ち物・服装などは確定後に掲載します。（仮）</p></div></li>
-          </ol>
+        <div class="sec-title"><h2>料金・ご案内</h2><span class="rule"><svg><use href="#i-star"/></svg></span><span class="dr">金額はリーフレット記載。公開前に現行を確認</span></div>
+        <p class="sec-lead">ライフスタイルに合わせて、無理なく続けられるプランをご用意しています。</p>
+        <div class="plans">
+          <article class="plan">
+            <div class="plan-head"><svg><use href="#i-leaf"/></svg><h3>体験レッスン</h3></div>
+            <div class="plan-body">
+              <div>
+                <p style="font-family:var(--f-head);font-size:16px">グループ体験レッスン</p>
+                <p class="amt" style="text-align:left;font-size:28px">1,000<small style="display:inline;margin-left:4px">円（税込）</small></p>
+                <p style="font-size:15px">はじめての方も安心してご参加いただけます。</p>
+              </div>
+              <div class="photo"><img src="assets/trial.jpg" alt="畳の上にクッションとクリスタルボウルが置かれたスタジオ" width="163" height="155"><span class="img-note">イメージ</span></div>
+            </div>
+          </article>
+
+          <article class="plan">
+            <div class="plan-head"><span class="pop">人気<br>No.1</span><h3>月会員プラン</h3></div>
+            <ul class="rows">
+              <li><div><b>月4回プラン</b><span class="s">月4回までご参加いただけます</span></div><div class="amt">7,700円<small>／月（税込）</small></div></li>
+              <li><div><b>月8回プラン</b><span class="s">月8回までご参加いただけます</span></div><div class="amt">12,800円<small>／月（税込）</small></div></li>
+              <li><div><b>フリープラン</b><span class="s">回数を気にせずご参加いただけます</span></div><div class="amt">16,800円<small>／月（税込）</small></div></li>
+            </ul>
+            <div class="fine"><span>・オンラインレッスンもすべてのプランに含まれます。</span><span>・ご家族でのシェア会員制度もございます。詳細はお問い合わせください。</span><span class="dr" style="justify-self:start">申込・支払い方法（自動課金の有無）は検討中</span></div>
+          </article>
+
+          <article class="plan">
+            <div class="plan-head"><svg><use href="#i-book"/></svg><h3>年間プログラム（講座）</h3></div>
+            <ul class="rows">
+              <li><div><b>花曼荼羅講座</b><span class="s">季節の花で曼荼羅をつくり、心を整える時間を深めていきます。</span></div><div class="amt">48,000円<small>全6回（税込）</small></div></li>
+              <li><div><b>ヨガ哲学講座</b><span class="s">ヨガの智慧を日常に生かすための学びを深めていきます。</span></div><div class="amt">48,000円<small>全6回（税込）</small></div></li>
+            </ul>
+            <div class="fine"><span>※講座は対面・オンラインどちらでもご受講いただけます。</span><span class="dr" style="justify-self:start">講座の期間（全6回の開催期間）を確認</span></div>
+          </article>
+
+          <article class="plan">
+            <div class="plan-head"><svg><use href="#i-moon"/></svg><h3>オンラインレッスン</h3></div>
+            <div class="plan-body">
+              <div>
+                <p style="font-family:var(--f-head);font-size:16px">全国どこからでもご参加いただけます</p>
+                <ul class="checks">
+                  <li>ライブレッスン（Zoom）</li>
+                  <li>アーカイブ動画見放題<span class="dr">配信方法を検討中</span></li>
+                  <li>オンラインお話会・ヨガ哲学の学び会</li>
+                </ul>
+              </div>
+              <div class="photo" style="aspect-ratio:3/4"><img src="assets/online.jpg" alt="ノートパソコンの画面に映るヨガのレッスン" width="146" height="207"><span class="img-note">イメージ</span></div>
+            </div>
+          </article>
         </div>
+
+        <ol class="steps" aria-label="ご入会までの流れ">
+          <li><span class="no">01</span><svg><use href="#i-cal"/></svg>体験レッスン<br>ご予約</li>
+          <li><span class="no">02</span><svg><use href="#i-yoga"/></svg>体験レッスンに<br>ご参加</li>
+          <li><span class="no">03</span><svg><use href="#i-pen"/></svg>ご入会手続き・<br>プラン決定</li>
+          <li><span class="no">04</span><svg><use href="#i-lotus"/></svg>レッスン開始<br>（対面・オンライン）</li>
+        </ol>
+        <p class="welcome">まずは体験レッスンへお越しください。<br>Arcisの空気感を感じていただけたら嬉しいです。<br>お会いできることを心より楽しみにしています。</p>
       </div>
     </section>
 
     <!-- ⑦ アクセス・FAQ・お問い合わせ -->
     <section class="sec sec-alt" id="access">
       <div class="wrap">
-        <div class="sec-title"><span class="en">Information</span><h2>アクセス・よくある質問</h2><span class="rule"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 0l1.2 4.8L12 6 7.2 7.2 6 12 4.8 7.2 0 6l4.8-1.2z" fill="currentColor"/></svg></span></div>
+        <div class="sec-title"><h2>アクセス・お問い合わせ</h2><span class="rule"><svg><use href="#i-star"/></svg></span></div>
         <div class="info">
           <div>
             <h3>アクセス</h3>
-            <dl class="dl">
-              <dt>住所</dt><dd><span class="tmp">確認後に掲載</span></dd>
-              <dt>最寄り駅</dt><dd><span class="tmp">確認後に掲載</span></dd>
-              <dt>地図</dt><dd><span class="tmp">地図リンク未設定</span></dd>
-            </dl>
+            <div class="addr">
+              <p><b>対面レッスン会場</b>　熊本市東区長嶺東</p>
+              <p>詳細な住所はご予約時にお知らせします。</p>
+              <p>阿蘇の山々を一望できる、静かなスタジオです。</p>
+            </div>
+            <div class="photo access-photo"><img src="assets/studio.jpg" alt="大きな窓から山並みが見える木の床のスタジオ" width="248" height="175"><span class="img-note">イメージ</span></div>
+            <p class="dr" style="margin-top:10px">実際のスタジオ写真か確認</p>
           </div>
-          <div>
-            <h3>よくある質問</h3>
-            <details><summary>キャンセルはできますか？</summary><p class="tmp-text">キャンセル・返金の条件を決めてから掲載します。（仮）</p></details>
-            <details><summary>支払い方法は何がありますか？</summary><p class="tmp-text">Squareで受け付ける支払い方法を確定後に掲載します。（仮）</p></details>
-            <details><summary>初めてでも参加できますか？</summary><p class="tmp-text">回答は原稿をいただいてから掲載します。（仮）</p></details>
+          <div id="faq">
+            <h3>よくあるご質問</h3>
+            <details><summary>はじめてでも参加できますか？</summary><p>はい。はじめての方も安心してご参加いただけます。まずは体験レッスン（1,000円・税込）からどうぞ。</p></details>
+            <details><summary>オンラインでも参加できますか？</summary><p>はい。ライブレッスン（Zoom）で、全国どこからでもご参加いただけます。</p></details>
+            <details class="drb"><summary>キャンセルはできますか？</summary><p><span class="dr">規定確定後に掲載</span>レッスン開始24時間前までのキャンセルは全額返金、当日・無断欠席は受講料の100％をご負担いただく方向で検討中です。</p></details>
+            <details class="drb"><summary>支払い方法は何がありますか？</summary><p><span class="dr">確定後に掲載</span>クレジットカードなど、Squareで受け付ける方法を掲載します。</p></details>
           </div>
           <div id="contact">
-            <h3>お問い合わせ</h3>
-            <div class="sns">
-              <span class="btn btn-outline" aria-disabled="true">LINEで問い合わせる（URL確認待ち）</span>
-              <span class="btn btn-outline" aria-disabled="true">Instagram（URL確認待ち）</span>
+            <h3>ご予約・お問い合わせ</h3>
+            <div class="contact">
+              <a class="btn btn-primary" href="#contact">公式LINEで問い合わせる</a>
+              <span class="dr" style="justify-self:start">LINEのURL未確認</span>
+              <a class="btn btn-outline" href="#contact">Instagram　@arcis.yoga</a>
+              <span class="dr" style="justify-self:start">InstagramのURLを確認のうえリンク</span>
+              <p class="mail"><span>メール</span>arcis.yoga.life@gmail.com</p>
             </div>
           </div>
         </div>
       </div>
     </section>
+
+    <section class="sec" style="padding-block:48px">
+      <div class="wrap">
+        <div class="closing">
+          <div class="photo"><img src="assets/plant.jpg" alt="白い草花とキャンドル" width="265" height="175"><span class="img-note">イメージ</span></div>
+          <div class="t"><b>Arcisは、あなたの「祈りのある暮らし」をサポートします。</b>慌ただしい毎日の中で、ほっとひと息つける場所。あなたの中のまっすぐな光に気づき、本来の自分へ還る時間を、一緒に育てていきましょう。</div>
+        </div>
+      </div>
+    </section>
   </main>
 
-  <footer class="s-foot">
+  <footer class="s-foot" data-hide-dock>
     <div class="wrap">
+      <img class="foot-logo" src="assets/logo.png" alt="Arcis" width="530" height="560">
+      <p class="tagline">まっすぐな光、自分に還る時間</p>
       <nav aria-label="規約など">
         <a href="#top">特定商取引法に基づく表記</a>
         <a href="#top">プライバシーポリシー</a>
         <a href="#top">キャンセル・返金について</a>
       </nav>
-      <p style="margin:0;font-family:var(--f-latin);letter-spacing:.2em">© ARCIS</p>
+      <p style="font-family:var(--f-latin);letter-spacing:.14em">© Arcis</p>
     </div>
   </footer>
 
-  <div class="dock">
-    <a class="btn btn-primary" href="#schedule">レッスンを予約</a>
+  <div class="dock" aria-label="予約と購入">
+    <a class="btn btn-primary" href="#reserve">レッスンを予約</a>
     <a class="btn btn-outline" href="#shop">商品を見る</a>
   </div>
 </div>
@@ -529,7 +636,7 @@ details p{margin:0 0 14px}
   var tpl=document.getElementById('site-tpl');
   document.querySelectorAll('[data-slot]').forEach(function(slot){
     slot.appendChild(tpl.content.cloneNode(true));
-    // 枠の中だけでページ内リンクを動かす（見本用）
+    // 見本用：枠の中だけでページ内移動
     slot.addEventListener('click',function(e){
       var a=e.target.closest('a[href^="#"]');
       if(!a)return;
@@ -537,8 +644,19 @@ details p{margin:0 0 14px}
       var id=a.getAttribute('href').slice(1);
       var t=id==='top'?null:slot.querySelector('#'+id);
       var head=slot.querySelector('.s-head');
-      slot.scrollTo({top:t?t.offsetTop-(head?head.offsetHeight:0):0});
+      slot.scrollTo({top:t?Math.max(0,t.offsetTop-(head?head.offsetHeight:0)):0});
     });
+    // 固定ボタン：予約・購入ボタンやフッターが見えている間は隠す
+    var dock=slot.querySelector('.dock');
+    var zones=slot.querySelectorAll('[data-hide-dock]');
+    if(!('IntersectionObserver' in window)){dock.classList.add('show');return;}
+    var seen=new Map();
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(en){seen.set(en.target,en.isIntersecting);});
+      var any=false;seen.forEach(function(v){if(v)any=true;});
+      dock.classList.toggle('show',!any);
+    },{root:slot,threshold:0});
+    zones.forEach(function(z){io.observe(z);});
   });
   var pc=document.querySelector('.frame-pc .viewport');
   var scaler=document.querySelector('.frame-pc .scaler');
@@ -546,9 +664,11 @@ details p{margin:0 0 14px}
     var w=scaler.clientWidth||1280;
     var s=Math.min(1,w/1280);
     pc.style.transform='scale('+s+')';
-    scaler.style.height=(800*s)+'px';
+    scaler.style.height=(820*s)+'px';
   }
   fit();
   if(window.ResizeObserver){new ResizeObserver(fit).observe(scaler);}else{window.addEventListener('resize',fit);}
+  var t=document.getElementById('t-public');
+  t.addEventListener('change',function(){document.getElementById('board').classList.toggle('public',t.checked);});
 })();
 </script>
