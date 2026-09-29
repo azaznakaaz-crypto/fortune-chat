@@ -166,6 +166,25 @@ body{color:var(--brown);font-family:var(--f-body);font-size:15px;line-height:1.7
 .rv .btn{margin-top:4px}
 .flow-note{margin-top:22px;background:var(--white);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:8px;padding:14px 16px;font-size:15px;display:grid;gap:6px}
 
+.pv{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:22px 20px;display:grid;gap:18px;max-width:640px;margin:0 auto}
+.pv-head{display:grid;gap:8px}
+.pv-head h3{font-size:20px;letter-spacing:.08em}
+.pv-head p{font-size:15px}
+.pv-people{border:0;margin:0;padding:0}
+.pv-people legend{font-weight:700;font-size:15px;margin-bottom:10px}
+.pv-opts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.pv-opts label{position:relative;cursor:pointer}
+.pv-opts input{position:absolute;opacity:0;inset:0}
+.pv-opts span{display:grid;place-items:center;min-height:52px;border:1.5px solid var(--line);border-radius:10px;font-weight:700;font-size:17px;background:var(--ivory)}
+.pv-opts input:checked+span{border-color:var(--brown);background:var(--brown);color:var(--white)}
+.pv-opts input:focus-visible+span{outline:2px solid var(--gold-text);outline-offset:3px}
+.pv-total{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding-block:14px;font-variant-numeric:tabular-nums}
+.pv-calc{font-size:15px;color:var(--muted)}
+.pv-sum{font-size:16px}
+.pv-sum b{font-family:var(--f-head);font-weight:600;font-size:30px;margin-inline:4px}
+.pv-sum small{font-size:13px}
+.pv-go{width:100%}
+
 /* ⑤ 商品 */
 .prods{display:grid;gap:14px}
 .prod{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;grid-template-columns:96px 1fr;gap:14px;align-items:center}
@@ -308,7 +327,7 @@ details p{padding-bottom:14px;font-size:15px}
 <div class="board" id="board">
   <header class="board-head">
     <div>
-      <h1>Arcis トップページ デザイン見本（第4版）</h1>
+      <h1>Arcis トップページ デザイン見本（第5版）</h1>
       <p>スマートフォン版（左）とパソコン版（右）。枠の中はスクロールできます。点線の枠と「確認用」の印は、公開前に確定・削除する箇所です。</p>
     </div>
     <div class="controls">
@@ -360,6 +379,7 @@ details p{padding-bottom:14px;font-size:15px}
         <li><span class="k">体験</span>リーフレットでは「LINEまたはInstagramのDMで予約」。オンライン予約に一本化するか</li>
         <li><span class="k">移行</span>DM受付の終了日（切替日）と、上部のお知らせの掲載期間</li>
         <li><span class="k">Square</span>予約・購入のボタンは、SquareのURLを設定するまで「準備中」で押せません（設定は links.js）</li>
+        <li><span class="k">料金</span>貸切レッスンの1人あたりの料金は未定。見本は仮の3,000円で計算しています</li>
         <li><span class="k">Instagram</span>@arcis.yoga のURLを確認のうえリンクします</li>
       </ul>
     </section>
@@ -471,34 +491,37 @@ details p{padding-bottom:14px;font-size:15px}
       <div class="wrap">
         <div class="sec-title"><h2>レッスンのご予約</h2><span class="rule"><svg><use href="#i-star"/></svg></span></div>
         <p class="sec-lead">まずは体験レッスンへお越しください。<br>開催日時と空き状況は、予約画面でいつでも最新をご確認いただけます。</p>
-        <div class="reserve" data-hide-dock>
-          <article class="rv">
-            <div class="rv-top"><h3>体験レッスン</h3><span class="price">1,000<small>円（税込）</small><span class="dr">要確認</span></span></div>
-            <div class="tags"><span class="tag">はじめての方</span><span class="tag">グループ</span></div>
-            <p>はじめての方も安心してご参加いただけます。Arcisの空気感を感じてみてください。</p>
-            <a class="btn btn-primary" href="#reserve" data-link="bookingTrial" data-fallback="booking">空き状況を確認する</a>
-          </article>
-          <article class="rv">
-            <div class="rv-top"><h3>通常レッスン</h3></div>
-            <div class="tags"><span class="tag">対面</span><span class="tag">オンライン</span></div>
-            <p>ヨガ、クリスタルボウル、ヨガニードラなど。開催日ごとの内容と定員は予約画面でご覧いただけます。<span class="dr">1回参加の料金・会員の予約方法は検討中</span></p>
-            <a class="btn btn-primary" href="#reserve" data-link="booking">空き状況を確認する</a>
-          </article>
-          <article class="rv drb">
-            <div class="rv-top"><h3>個別レッスン</h3><span class="dr">内容・料金は確定後に掲載</span></div>
-            <div class="tags"><span class="tag">1対1</span></div>
-            <p>ご希望に合わせた時間をご用意します。まずはお気軽にご相談ください。</p>
-            <a class="btn btn-outline" href="#contact" data-link="line">LINEで相談する</a>
-          </article>
+        <div class="pv" data-hide-dock>
+          <div class="pv-head">
+            <h3>貸切プライベートレッスン</h3>
+            <p>1組で1枠を貸し切ります。ご参加は代表者を含めて1〜4名さままで。代表者さまが全員分をまとめてご予約・お支払いください。</p>
+          </div>
+          <fieldset class="pv-people">
+            <legend>参加人数を選ぶ</legend>
+            <div class="pv-opts">
+              <label><input type="radio" value="1" data-people checked><span>1名</span></label>
+              <label><input type="radio" value="2" data-people><span>2名</span></label>
+              <label><input type="radio" value="3" data-people><span>3名</span></label>
+              <label><input type="radio" value="4" data-people><span>4名</span></label>
+            </div>
+          </fieldset>
+          <div class="pv-total" aria-live="polite">
+            <span class="pv-calc" data-calc>1名 × 3,000円</span>
+            <span class="pv-sum">合計 <b data-sum>3,000</b>円<small>（税込）</small></span>
+            <span class="dr" data-sample>仮の料金で計算しています</span>
+          </div>
+          <a class="btn btn-primary pv-go" href="#reserve" data-link="private1" data-private>この人数で日時を選ぶ</a>
+          <p class="go-note">Square（スクエア）の予約画面に移動します。空いている日時を選び、代表者さまのお名前・連絡先を入力して、合計金額をお支払いください。<b>お支払いが完了した時点でご予約が確定</b>し、確認メールが届きます。</p>
         </div>
+        <p class="drb" style="margin-top:14px;font-size:14px;color:var(--draft)"><span class="dr">確認用</span>体験レッスン・年間講座・月会員・ポイントでのご予約方法は確認中です。</p>
         <div class="flow-note">
-          <p class="go-note" style="font-size:14.5px;color:var(--brown)">「空き状況を確認する」を押すと、オンラインの予約画面に移動します。日時を選び、お名前・連絡先を入力してお申し込みください。お支払いはSquare（スクエア）の画面で安全に行われ、カード情報がArcisに保存されることはありません。</p>
-          <p class="drb" style="font-size:14px;color:var(--draft)"><span class="dr">確認用</span>予約成立のタイミング：体験・1回参加は「お支払い完了時」。月会員・ポイントでのご予約は、方式が決まってから記載します。</p>
+          <p class="go-note" style="font-size:14.5px;color:var(--brown)">お支払いはSquare（スクエア）の画面で行われ、カード情報がArcisに保存されることはありません。キャンセルは開始時刻の24時間前まで全額返金、それを過ぎてからのキャンセルと無断欠席は全額のご負担となります。</p>
+          <p class="drb" style="font-size:14px;color:var(--draft)"><span class="dr">確認用</span>月会員・ポイントでのご予約（二重請求しない流れ）は、方式が決まってから記載します。</p>
         </div>
         <div class="switch" id="switch" data-hide-dock>
           <h3>これまでInstagramのDMでお申し込みいただいていた方へ</h3>
           <ol>
-            <li>ご予約は、このページの「空き状況を確認する」からお申し込みください。<span class="dr">DM受付の終了日を確定</span></li>
+            <li>ご予約は、このページで人数を選び、「この人数で日時を選ぶ」からお申し込みください。<span class="dr">DM受付の終了日を確定</span></li>
             <li>すでにDMでお受けしているご予約は、そのまま有効です。改めてのお申し込みは不要です。</li>
             <li>月会員の方のご予約方法は、個別にご案内します。<span class="dr">方式決定後に記載</span></li>
             <li>操作がわからないときは、公式LINEでお気軽にご相談ください。</li>
@@ -537,7 +560,7 @@ details p{padding-bottom:14px;font-size:15px}
             <div class="plan-head"><svg><use href="#i-leaf"/></svg><h3>体験レッスン</h3></div>
             <div class="plan-body">
               <div>
-                <p style="font-family:var(--f-head);font-size:16px">グループ体験レッスン</p>
+                <p style="font-family:var(--f-head);font-size:16px">グループ体験レッスン<span class="dr">貸切の形に合わせて内容・料金を確認</span></p>
                 <p class="amt" style="text-align:left;font-size:28px">1,000<small style="display:inline;margin-left:4px">円（税込）</small></p>
                 <p style="font-size:15px">はじめての方も安心してご参加いただけます。</p>
               </div>
@@ -665,18 +688,37 @@ details p{padding-bottom:14px;font-size:15px}
     if(u.protocol!=='https:')return null;
     return ALLOWED.some(function(re){return re.test(u.hostname);})?u.href:null;
   }
-  function wire(root){
+  function wireOne(a){
     var L=window.ARCIS_LINKS||{};
-    root.querySelectorAll('[data-link]').forEach(function(a){
-      var url=safeUrl(L[a.dataset.link])||safeUrl(L[a.dataset.fallback]);
-      if(url){a.href=url;a.target='_blank';a.rel='noopener noreferrer';a.classList.remove('is-pending');a.removeAttribute('aria-disabled');}
-      else{a.removeAttribute('href');a.classList.add('is-pending');a.setAttribute('aria-disabled','true');}
-    });
+    var url=safeUrl(L[a.dataset.link])||safeUrl(L[a.dataset.fallback]);
+    if(url){a.href=url;a.target='_blank';a.rel='noopener noreferrer';a.classList.remove('is-pending');a.removeAttribute('aria-disabled');}
+    else{a.removeAttribute('href');a.removeAttribute('target');a.classList.add('is-pending');a.setAttribute('aria-disabled','true');}
+  }
+  function wire(root){root.querySelectorAll('[data-link]').forEach(wireOne);}
+  function yen(n){return n.toLocaleString('ja-JP');}
+  function people(root,idx){
+    var L=window.ARCIS_LINKS||{};
+    var price=Number(L.pricePerPerson)||0;
+    var radios=root.querySelectorAll('[data-people]');
+    radios.forEach(function(r){r.name='people-'+idx;r.id='people-'+idx+'-'+r.value;});
+    var calc=root.querySelector('[data-calc]'),sum=root.querySelector('[data-sum]'),go=root.querySelector('[data-private]'),smp=root.querySelector('[data-sample]');
+    if(smp&&L.priceIsSample===false)smp.remove();
+    function upd(){
+      var n=Number(root.querySelector('[data-people]:checked').value);
+      if(price>0){calc.textContent=n+'名 × '+yen(price)+'円';sum.textContent=yen(price*n);}
+      else{calc.textContent=n+'名';sum.textContent='—';}
+      go.dataset.link='private'+n;
+      wireOne(go);
+    }
+    radios.forEach(function(r){r.addEventListener('change',upd);});
+    upd();
   }
   var tpl=document.getElementById('site-tpl');
+  var slotIndex=0;
   document.querySelectorAll('[data-slot]').forEach(function(slot){
     slot.appendChild(tpl.content.cloneNode(true));
     wire(slot);
+    people(slot,slotIndex++);
     // 見本用：枠の中だけでページ内移動
     slot.addEventListener('click',function(e){
       var a=e.target.closest('a[href^="#"]');

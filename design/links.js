@@ -6,8 +6,14 @@
  * 空欄（""）のボタンは「準備中」と表示され、押せない状態になります。
  */
 window.ARCIS_LINKS = {
-  // Square 予約：体験レッスンの予約ページ（未設定なら booking を使います）
-  bookingTrial: "",
+  // 貸切プライベートレッスン：1人あたりの料金（税込・円）。未定の間は仮の金額
+  pricePerPerson: 3000,
+  priceIsSample: true,   // 料金が確定したら false にする
+  // Square 予約：人数別メニューの予約ページ（1名用〜4名用）
+  private1: "",
+  private2: "",
+  private3: "",
+  private4: "",
   // Square 予約：オンライン予約サイトのURL（予約 → オンライン予約 → チャネル → URLを入手）
   booking: "",
   // Square オンラインビジネス：ショップのトップページ
