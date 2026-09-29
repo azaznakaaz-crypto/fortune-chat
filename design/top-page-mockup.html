@@ -87,6 +87,8 @@ body{color:var(--brown);font-family:var(--f-body);font-size:15px;line-height:1.7
 .site .btn-outline{background:var(--white);color:var(--brown)}
 .site .btn-outline:hover{background:var(--beige)}
 .btn-small{min-height:46px;padding:9px 16px;font-size:15px}
+.site .btn.is-pending{background:#EFEAE2;border-color:#CFC5B7;color:#6F655B;cursor:not-allowed}
+.site .btn.is-pending::after{content:"（準備中）";font-weight:500;font-size:.85em}
 .go-note{font-size:13.5px;color:var(--muted);line-height:1.6}
 
 /* 見出し（細い金線＋小さな星） */
@@ -306,7 +308,7 @@ details p{padding-bottom:14px;font-size:15px}
 <div class="board" id="board">
   <header class="board-head">
     <div>
-      <h1>Arcis トップページ デザイン見本（第3版）</h1>
+      <h1>Arcis トップページ デザイン見本（第4版）</h1>
       <p>スマートフォン版（左）とパソコン版（右）。枠の中はスクロールできます。点線の枠と「確認用」の印は、公開前に確定・削除する箇所です。</p>
     </div>
     <div class="controls">
@@ -357,6 +359,7 @@ details p{padding-bottom:14px;font-size:15px}
         <li><span class="k">残席・在庫</span>自動で最新にできるまで、数字は出さず「空き状況を確認する」「在庫を確認する」の入口にしています</li>
         <li><span class="k">体験</span>リーフレットでは「LINEまたはInstagramのDMで予約」。オンライン予約に一本化するか</li>
         <li><span class="k">移行</span>DM受付の終了日（切替日）と、上部のお知らせの掲載期間</li>
+        <li><span class="k">Square</span>予約・購入のボタンは、SquareのURLを設定するまで「準備中」で押せません（設定は links.js）</li>
         <li><span class="k">Instagram</span>@arcis.yoga のURLを確認のうえリンクします</li>
       </ul>
     </section>
@@ -473,19 +476,19 @@ details p{padding-bottom:14px;font-size:15px}
             <div class="rv-top"><h3>体験レッスン</h3><span class="price">1,000<small>円（税込）</small><span class="dr">要確認</span></span></div>
             <div class="tags"><span class="tag">はじめての方</span><span class="tag">グループ</span></div>
             <p>はじめての方も安心してご参加いただけます。Arcisの空気感を感じてみてください。</p>
-            <a class="btn btn-primary" href="#reserve">空き状況を確認する</a>
+            <a class="btn btn-primary" href="#reserve" data-link="bookingTrial" data-fallback="booking">空き状況を確認する</a>
           </article>
           <article class="rv">
             <div class="rv-top"><h3>通常レッスン</h3></div>
             <div class="tags"><span class="tag">対面</span><span class="tag">オンライン</span></div>
             <p>ヨガ、クリスタルボウル、ヨガニードラなど。開催日ごとの内容と定員は予約画面でご覧いただけます。<span class="dr">1回参加の料金・会員の予約方法は検討中</span></p>
-            <a class="btn btn-primary" href="#reserve">空き状況を確認する</a>
+            <a class="btn btn-primary" href="#reserve" data-link="booking">空き状況を確認する</a>
           </article>
           <article class="rv drb">
             <div class="rv-top"><h3>個別レッスン</h3><span class="dr">内容・料金は確定後に掲載</span></div>
             <div class="tags"><span class="tag">1対1</span></div>
             <p>ご希望に合わせた時間をご用意します。まずはお気軽にご相談ください。</p>
-            <a class="btn btn-outline" href="#contact">相談する</a>
+            <a class="btn btn-outline" href="#contact" data-link="line">LINEで相談する</a>
           </article>
         </div>
         <div class="flow-note">
@@ -500,7 +503,7 @@ details p{padding-bottom:14px;font-size:15px}
             <li>月会員の方のご予約方法は、個別にご案内します。<span class="dr">方式決定後に記載</span></li>
             <li>操作がわからないときは、公式LINEでお気軽にご相談ください。</li>
           </ol>
-          <a class="btn btn-outline btn-small" href="https://line.me/R/ti/p/@317tvtys" target="_blank" rel="noopener" style="justify-self:start">公式LINEで相談する</a>
+          <a class="btn btn-outline btn-small" href="#contact" data-link="line" style="justify-self:start">公式LINEで相談する</a>
         </div>
       </div>
     </section>
@@ -513,12 +516,12 @@ details p{padding-bottom:14px;font-size:15px}
         <div class="prods" data-hide-dock>
           <article class="prod">
             <div class="prod-ph drb"><svg><use href="#i-bag"/></svg></div>
-            <div><h3>ヨガパンツ</h3><p class="p">サイズ・カラー・税込価格<span class="dr">確定後に掲載</span></p><a class="btn btn-outline btn-small" href="#shop">在庫を確認する</a></div>
+            <div><h3>ヨガパンツ</h3><p class="p">サイズ・カラー・税込価格<span class="dr">確定後に掲載</span></p><a class="btn btn-outline btn-small" href="#shop" data-link="yogaPants" data-fallback="shop">在庫を確認する</a></div>
           </article>
         </div>
         <p class="sec-photo-note"><span class="dr">商品写真は実物の撮影が必要</span></p>
         <div class="shop-foot">
-          <a class="btn btn-primary" href="#shop">オンラインショップを見る</a>
+          <a class="btn btn-primary" href="#shop" data-link="shop">オンラインショップを見る</a>
           <p class="go-note">Square（スクエア）のオンラインショップに移動します。送料・お届け先の入力とお支払いはショップの画面で行います。</p>
         </div>
       </div>
@@ -595,9 +598,9 @@ details p{padding-bottom:14px;font-size:15px}
           <div>
             <h3>アクセス</h3>
             <div class="addr">
-              <p><b>対面レッスン会場</b>　熊本市東区長嶺東</p>
+              <p><b>対面レッスン会場</b>　熊本市南区良町</p>
               <p>詳細な住所はご予約時にお知らせします。</p>
-              <p>阿蘇の山々を一望できる、静かなスタジオです。</p>
+              <p class="drb">静かなスタジオです。<span class="dr">眺めなどの紹介文は新しい場所に合わせて確認</span></p>
             </div>
             <div class="photo access-photo"><img src="assets/studio.jpg" alt="大きな窓から山並みが見える木の床のスタジオ" width="248" height="175"><span class="img-note">イメージ</span></div>
           </div>
@@ -611,10 +614,10 @@ details p{padding-bottom:14px;font-size:15px}
           <div id="contact">
             <h3>ご予約・お問い合わせ</h3>
             <div class="contact">
-              <a class="btn btn-primary" href="https://line.me/R/ti/p/@317tvtys" target="_blank" rel="noopener">公式LINEで問い合わせる</a>
-              <a class="btn btn-outline" href="#contact">Instagram　@arcis.yoga</a>
+              <a class="btn btn-primary" href="#contact" data-link="line">公式LINEで問い合わせる</a>
+              <a class="btn btn-outline" href="#contact" data-link="instagram">Instagram　@arcis.yoga</a>
               <span class="dr" style="justify-self:start">InstagramのURLを確認のうえリンク</span>
-              <p class="mail"><span>メール</span>arcis.yoga.life@gmail.com</p>
+              <p class="mail"><span>メール</span><a href="mailto:arcis.yoga.1013@gmail.com">arcis.yoga.1013@gmail.com</a></p>
             </div>
           </div>
         </div>
@@ -651,11 +654,29 @@ details p{padding-bottom:14px;font-size:15px}
 </div>
 </template>
 
+<script src="links.js"></script>
 <script>
 (function(){
+  // 外部リンク：links.js の公開URLだけを使い、許可したサイト以外へはつながない
+  var ALLOWED=[/(^|\.)squareup\.com$/,/(^|\.)square\.site$/,/^square\.link$/,/^line\.me$/,/^(www\.)?instagram\.com$/];
+  function safeUrl(v){
+    if(typeof v!=='string'||!v)return null;
+    try{var u=new URL(v);}catch(e){return null;}
+    if(u.protocol!=='https:')return null;
+    return ALLOWED.some(function(re){return re.test(u.hostname);})?u.href:null;
+  }
+  function wire(root){
+    var L=window.ARCIS_LINKS||{};
+    root.querySelectorAll('[data-link]').forEach(function(a){
+      var url=safeUrl(L[a.dataset.link])||safeUrl(L[a.dataset.fallback]);
+      if(url){a.href=url;a.target='_blank';a.rel='noopener noreferrer';a.classList.remove('is-pending');a.removeAttribute('aria-disabled');}
+      else{a.removeAttribute('href');a.classList.add('is-pending');a.setAttribute('aria-disabled','true');}
+    });
+  }
   var tpl=document.getElementById('site-tpl');
   document.querySelectorAll('[data-slot]').forEach(function(slot){
     slot.appendChild(tpl.content.cloneNode(true));
+    wire(slot);
     // 見本用：枠の中だけでページ内移動
     slot.addEventListener('click',function(e){
       var a=e.target.closest('a[href^="#"]');

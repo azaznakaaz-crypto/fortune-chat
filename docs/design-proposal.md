@@ -16,6 +16,12 @@
 > - ロゴは元データがないため、リーフレットからの切り出しを仮で使います。
 > - 公式LINEのURL（https://line.me/R/ti/p/@317tvtys）をLINEボタンに設定しました。
 > - ポイントの有効期限は**購入日から3か月**、キャンセル期限は**クラス開始時刻の24時間前**として、運用案を [membership-points-proposal.md](membership-points-proposal.md) に書きました。
+>
+> **2026年9月29日 追記（第4版）**
+> - 教室の場所を**熊本市南区良町**に変更しました（番地・地図の位置は掲載していません）。リーフレットにあった「阿蘇の山々を一望できる」という紹介は、新しい場所に合うか確認するまで確認用の扱いにしています。
+> - 連絡先メールアドレスを **arcis.yoga.1013@gmail.com** に変更しました。
+> - ポイントの期限・利用順・返還と、キャンセル規定は、ご了承いただいた内容で確定しました。法令・Squareの条件の未確認点は、販売開始前に確認します（[membership-points-proposal.md](membership-points-proposal.md) の「販売開始前の確認事項」）。
+> - Squareとの連携手順と、連携の状況は [square-setup-guide.md](square-setup-guide.md) にまとめました。サイトの予約・購入ボタンは、設定ファイル `design/links.js` にSquareの公開URLを入れるとつながります。
 
 ---
 
