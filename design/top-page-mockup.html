@@ -327,7 +327,7 @@ details p{padding-bottom:14px;font-size:15px}
 <div class="board" id="board">
   <header class="board-head">
     <div>
-      <h1>Arcis トップページ デザイン見本（第5版）</h1>
+      <h1>Arcis トップページ デザイン見本（第6版）</h1>
       <p>スマートフォン版（左）とパソコン版（右）。枠の中はスクロールできます。点線の枠と「確認用」の印は、公開前に確定・削除する箇所です。</p>
     </div>
     <div class="controls">
@@ -379,7 +379,8 @@ details p{padding-bottom:14px;font-size:15px}
         <li><span class="k">体験</span>リーフレットでは「LINEまたはInstagramのDMで予約」。オンライン予約に一本化するか</li>
         <li><span class="k">移行</span>DM受付の終了日（切替日）と、上部のお知らせの掲載期間</li>
         <li><span class="k">Square</span>予約・購入のボタンは、SquareのURLを設定するまで「準備中」で押せません（設定は links.js）</li>
-        <li><span class="k">料金</span>貸切レッスンの1人あたりの料金は未定。見本は仮の3,000円で計算しています</li>
+        <li><span class="k">料金</span>貸切レッスンの1人あたりの料金は未定。見本だけ仮の3,000円で計算しています（本番の料金としては設定していません）</li>
+        <li><span class="k">支払い</span>参加者ごとの支払い・月会員・ポイントの混在は、方式の決定待ち</li>
         <li><span class="k">Instagram</span>@arcis.yoga のURLを確認のうえリンクします</li>
       </ul>
     </section>
@@ -494,7 +495,8 @@ details p{padding-bottom:14px;font-size:15px}
         <div class="pv" data-hide-dock>
           <div class="pv-head">
             <h3>貸切プライベートレッスン</h3>
-            <p>1組で1枠を貸し切ります。ご参加は代表者を含めて1〜4名さままで。代表者さまが全員分をまとめてご予約・お支払いください。</p>
+            <p>1組で1枠を貸し切ります。ご参加は代表者さまを含めて1〜4名さままでです。</p>
+            <p class="drb" style="font-size:14px;color:var(--draft)"><span class="dr">確認用</span>お支払いの方法（おひとりずつのお支払い、月会員の回数、ご本人のポイント）は検討中です。</p>
           </div>
           <fieldset class="pv-people">
             <legend>参加人数を選ぶ</legend>
@@ -507,11 +509,11 @@ details p{padding-bottom:14px;font-size:15px}
           </fieldset>
           <div class="pv-total" aria-live="polite">
             <span class="pv-calc" data-calc>1名 × 3,000円</span>
-            <span class="pv-sum">合計 <b data-sum>3,000</b>円<small>（税込）</small></span>
-            <span class="dr" data-sample>仮の料金で計算しています</span>
+            <span class="pv-sum">1組の合計 <b data-sum>3,000</b>円<small>（税込）</small></span>
+            <span class="dr" data-sample>見本用の仮の金額です（料金は未定）</span>
           </div>
           <a class="btn btn-primary pv-go" href="#reserve" data-link="private1" data-private>この人数で日時を選ぶ</a>
-          <p class="go-note">Square（スクエア）の予約画面に移動します。空いている日時を選び、代表者さまのお名前・連絡先を入力して、合計金額をお支払いください。<b>お支払いが完了した時点でご予約が確定</b>し、確認メールが届きます。</p>
+          <p class="go-note">Square（スクエア）の予約画面に移動します。空いている日時を選び、代表者さまのお名前・連絡先を入力してお申し込みください。<span class="dr">予約が確定するタイミングは、支払い方法の決定後に記載</span></p>
         </div>
         <p class="drb" style="margin-top:14px;font-size:14px;color:var(--draft)"><span class="dr">確認用</span>体験レッスン・年間講座・月会員・ポイントでのご予約方法は確認中です。</p>
         <div class="flow-note">
@@ -698,11 +700,13 @@ details p{padding-bottom:14px;font-size:15px}
   function yen(n){return n.toLocaleString('ja-JP');}
   function people(root,idx){
     var L=window.ARCIS_LINKS||{};
-    var price=Number(L.pricePerPerson)||0;
+    var real=Number(L.pricePerPerson)||0;
+    var sample=Number(L.samplePricePerPerson)||0;
+    var price=real||sample;
     var radios=root.querySelectorAll('[data-people]');
     radios.forEach(function(r){r.name='people-'+idx;r.id='people-'+idx+'-'+r.value;});
     var calc=root.querySelector('[data-calc]'),sum=root.querySelector('[data-sum]'),go=root.querySelector('[data-private]'),smp=root.querySelector('[data-sample]');
-    if(smp&&L.priceIsSample===false)smp.remove();
+    if(smp&&real)smp.remove();
     function upd(){
       var n=Number(root.querySelector('[data-people]:checked').value);
       if(price>0){calc.textContent=n+'名 × '+yen(price)+'円';sum.textContent=yen(price*n);}

@@ -6,9 +6,10 @@
  * 空欄（""）のボタンは「準備中」と表示され、押せない状態になります。
  */
 window.ARCIS_LINKS = {
-  // 貸切プライベートレッスン：1人あたりの料金（税込・円）。未定の間は仮の金額
-  pricePerPerson: 3000,
-  priceIsSample: true,   // 料金が確定したら false にする
+  // 貸切プライベートレッスン：1人あたりの本番の料金（税込・円）。未定の間は null のまま
+  pricePerPerson: null,
+  // 見本の画面だけで使う仮の金額（本番の料金ではありません。Squareにも設定しません）
+  samplePricePerPerson: 3000,
   // Square 予約：人数別メニューの予約ページ（1名用〜4名用）
   private1: "",
   private2: "",
