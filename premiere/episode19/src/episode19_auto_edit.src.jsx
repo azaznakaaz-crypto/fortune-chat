@@ -275,54 +275,68 @@
     }
 
     // ---------------------------------------------------------------- 0. preflight
-    if (!app.project || !app.project.path) { alert('Premiereでプロジェクトを開いてから実行してください。'); return; }
-    if (!qeInit()) { log('QE DOM を有効化できませんでした（トラック追加・Lumetri・レーザーは手動扱いになります）。'); }
+    // EP19_MODE: 'check' = 何も変更せずに準備状況だけ表示 / 'run' = 実行（パネルのボタンが設定）
+    var MODE = (typeof EP19_MODE !== 'undefined' && EP19_MODE === 'check') ? 'check' : 'run';
+    var CHECKS = [];      // [ok(bool), blocking(bool), text]
+    function check(ok, blocking, text) { CHECKS.push([ok, blocking, text]); return ok; }
+    function checkText() {
+        var out = [], k;
+        for (k = 0; k < CHECKS.length; k++) { out.push((CHECKS[k][0] ? '○ ' : (CHECKS[k][1] ? '× ' : '△ ')) + CHECKS[k][2]); }
+        return out.join('\n');
+    }
+    function blocked() { for (var k = 0; k < CHECKS.length; k++) { if (!CHECKS[k][0] && CHECKS[k][1]) { return true; } } return false; }
+    function finish(msg) { $.global.EP19_RESULT = msg; alert(msg); }
 
+    if (!app.project || !app.project.path) { finish('Premiereでプロジェクトを開いてから実行してください。'); return; }
     var projFile = new File(app.project.path);
     var projDir = projFile.parent;
+    var projName = nfc(decodeURI(projFile.name));
+
+    // 安全装置: 名前に「確認用」を含む複製プロジェクトでしか動かない（元プロジェクトでは絶対に実行しない）
+    check(projName.indexOf('確認用') >= 0, true, '開いているのは確認用の複製プロジェクト（' + projName + '）' +
+        (projName.indexOf('確認用') >= 0 ? '' : '\n   → 元プロジェクトでは実行しません。Finderで複製して名前に「確認用」を付けたものを開いてください'));
+    check(qeInit(), true, 'Premiere内部機能（QE DOM）が使える');
 
     var srcSeqs = findSeqByName(PLAN.sourceSequenceName);
-    if (srcSeqs.length !== 1) {
-        alert('元シーケンス「' + PLAN.sourceSequenceName + '」が ' + srcSeqs.length + ' 件見つかりました。1件のプロジェクトで実行してください。');
-        return;
-    }
-    if (findSeqByName(PLAN.newSequenceName).length) {
-        alert('「' + PLAN.newSequenceName + '」は既に存在します。二重実行を防ぐため中止しました。');
-        return;
-    }
-    var srcSeq = srcSeqs[0];
-    if (String(srcSeq.timebase) !== String(TPF)) {
-        alert('元シーケンスのフレームレートが30fpsではありません（timebase=' + srcSeq.timebase + '）。中止しました。');
-        return;
-    }
+    check(srcSeqs.length === 1, true, '元シーケンス「' + PLAN.sourceSequenceName + '」が1つだけある（' + srcSeqs.length + '件）');
+    var srcSeq = srcSeqs.length === 1 ? srcSeqs[0] : null;
+    if (srcSeq) { check(String(srcSeq.timebase) === String(TPF), true, '元シーケンスが30fps'); }
+    check(!findSeqByName(PLAN.newSequenceName).length, true, '「' + PLAN.newSequenceName + '」がまだ無い（二重実行防止）');
 
-    // assets folder
     var assetDir = new Folder(projDir.fsName + '/episode19_assets');
-    if (!assetDir.exists) { assetDir = Folder.selectDialog('episode19_assets フォルダを選択してください'); }
-    if (!assetDir || !assetDir.exists) { alert('episode19_assets フォルダが見つからないため中止しました。'); return; }
+    check(assetDir.exists, true, 'プロジェクトと同じフォルダに episode19_assets がある');
+    var pngCount = 0, csvFound = false;
+    if (assetDir.exists) {
+        var pf = assetDir.getFiles('*.png'), cf = assetDir.getFiles('*.csv'), k0;
+        for (k0 = 0; k0 < pf.length; k0++) { if (/^0[1-6]_/.test(nfc(decodeURI(pf[k0].name)))) { pngCount++; } }
+        for (k0 = 0; k0 < cf.length; k0++) { if (/素材配置一覧/.test(nfc(decodeURI(cf[k0].name)))) { csvFound = true; } }
+    }
+    check(pngCount === 6, true, '写真 01〜06 のPNGが6枚ある（' + pngCount + '枚）');
+    check(csvFound, true, '素材配置一覧.csv がある');
 
-    // previous project
     var prevFile = new File(projDir.fsName + '/' + PLAN.previousProject.fileName);
-    if (!prevFile.exists) { prevFile = new File(assetDir.fsName + '/' + PLAN.previousProject.fileName); }
-    if (!prevFile.exists) { prevFile = File.openDialog('前回プロジェクト「' + PLAN.previousProject.fileName + '」を選択してください', '*.prproj'); }
-    if (!prevFile || !prevFile.exists) { alert('前回プロジェクトが見つからないため中止しました。'); return; }
+    if (!prevFile.exists && assetDir.exists) { prevFile = new File(assetDir.fsName + '/' + PLAN.previousProject.fileName); }
+    check(prevFile.exists, true, '前回プロジェクト「' + PLAN.previousProject.fileName + '」がある（読み込むだけで変更しません）');
 
-    // templates
-    var tplDir = new Folder(assetDir.fsName + '/templates');
+    var tplDir = new Folder((assetDir.exists ? assetDir.fsName : projDir.fsName) + '/templates');
     function tpl(name) { var f = new File(tplDir.fsName + '/' + name); return f.exists ? f : null; }
-    // ファイル名は NFD 問題を避けるため ASCII（README の「テンプレート書き出し」参照）
+    // MOGRTは任意。無ければ前回プロジェクトのタイトルをそのまま複製して文字だけ差し替える方式を試す
     var TPL_TITLE = tpl('title.mogrt'), TPL_EMPH = tpl('emphasis.mogrt'), TPL_DIAG = tpl('diagram.mogrt');
+    check(true, false, 'テンプレート(.mogrt): ' + (TPL_TITLE || TPL_EMPH || TPL_DIAG ? '一部あり（優先して使用）' : 'なし → 前回タイトルの自動複製を試します（不要な準備はありません）'));
 
-    var newProjPath = projDir.fsName + '/' + decodeURI(projFile.name).replace(/\.prproj$/i, '') + '_自動編集案_v1.prproj';
-    if (new File(newProjPath).exists) { alert('作業用プロジェクトが既に存在します:\n' + newProjPath + '\n上書きを避けるため中止しました。'); return; }
+    var newProjPath = projDir.fsName + '/' + projName.replace(/\.prproj$/i, '') + '_自動編集案_v1.prproj';
+    check(!new File(newProjPath).exists, true, '作業用プロジェクト「' + new File(newProjPath).displayName + '」がまだ無い');
 
-    if (!confirm('次の処理を行います。\n\n' +
-        '1. 現在のプロジェクトを「' + new File(newProjPath).name + '」として別名保存（元の .prproj は変更しません）\n' +
-        '2. 元シーケンスを複製し「' + PLAN.newSequenceName + '」を作成\n' +
-        '3. ハイライト①〜③／オープニング①②／強調テロップ／写真／図解文字／画角／色補正を複製側に追加\n' +
-        '4. 確認用タイムコード付きシーケンスを作成し、可能ならMP4を書き出し\n\n' +
-        'テンプレート: タイトル=' + (TPL_TITLE ? 'あり' : 'なし') + ' / 強調=' + (TPL_EMPH ? 'あり' : 'なし') + ' / 図解=' + (TPL_DIAG ? 'あり' : 'なし') +
-        '\n（なしの項目は赤マーカーで残します）\n\n実行しますか？')) { return; }
+    if (MODE === 'check') {
+        finish('【確認のみ・何も変更していません】\n\n' + checkText() + '\n\n' +
+            (blocked() ? '× の項目を直してから、もう一度「確認」を押してください。' : 'すべて準備OKです。「実行」を押せます。'));
+        return;
+    }
+    if (blocked()) { finish('準備が足りないため中止しました（何も変更していません）。\n\n' + checkText()); return; }
+
+    if (!confirm('確認用プロジェクトで自動編集を実行します。\n\n' +
+        '・開いている「' + projName + '」を「' + new File(newProjPath).displayName + '」として別名保存してから作業します\n' +
+        '・元の .prproj／元シーケンス／基本テロップは変更しません\n\n実行しますか？')) { return; }
 
     // ---------------------------------------------------------------- 1. save as (keep original project untouched)
     app.project.saveAs(newProjPath);
@@ -369,38 +383,6 @@
             if (m) { csvMarkers.push({ marker: m, start: s, end: e }); }
         }
         log('CSVマーカー: ' + csvMarkers.length + ' 件');
-    })();
-
-    // ---------------------------------------------------------------- 4. telop fix (複製側のみ)
-    (function () {
-        var f = PLAN.telopFix, at = tcToFrames(f.start), done = false, k, j;
-        var tracks = seq.videoTracks;
-        for (k = 0; k < tracks.numTracks && !done; k++) {
-            var ti = itemAt(tracks[k], at);
-            if (!ti) { continue; }
-            for (j = 0; j < ti.components.numItems && !done; j++) {
-                var p = findProp(ti.components[j], ['ソーステキスト', 'Source Text']);
-                if (!p) { continue; }
-                var v = null;
-                try { v = p.getValue(); } catch (e) { }
-                if (typeof v === 'string' && v.indexOf(f.from) >= 0) {
-                    try { p.setValue(v.split(f.from).join(f.to), true); } catch (e2) { }
-                    var after = null;
-                    try { after = p.getValue(); } catch (e3) { }
-                    if (typeof after === 'string' && after.indexOf(f.to) >= 0 && after.indexOf(f.from) < 0) {
-                        done = true;
-                        try { ti.name = String(ti.name).split(f.from).join(f.to); } catch (e4) { }
-                    }
-                }
-            }
-        }
-        if (done) { log('肩書修正: ' + f.from + ' → ' + f.to + '（複製シーケンスのみ）'); }
-        else {
-            // マーカーはクリップ移動後の最終位置に置く（手順8の後）
-            FAILS.push({ what: '肩書テロップ修正「' + f.from + '」→「' + f.to + '」', at: mapF(at), needMarker: true,
-                why: 'このPremiereのバージョンではスクリプトからテキストを書き換えられませんでした。複製シーケンス上でエッセンシャルグラフィックスから1文字（聖→性）修正してください' });
-            log('[未処理] 肩書テロップ修正');
-        }
     })();
 
     // ---------------------------------------------------------------- 5. highlight subsequences (from the clone, before shifting)
@@ -515,10 +497,6 @@
             catch (eMk) { log('マーカー移動失敗: ' + cm.marker.name); }
         }
     })();
-    // telop-fix marker (needs final position)
-    for (i = 0; i < FAILS.length; i++) {
-        if (FAILS[i].needMarker) { addMarker(seq, FAILS[i].at, null, '要手動: ' + FAILS[i].what, FAILS[i].why, 'red'); }
-    }
 
     // ---------------------------------------------------------------- 9. place highlights and openings on V1
     function placeNest(nestSeq, atFrame, label) {
@@ -670,8 +648,75 @@
         }
         return false;
     }
+    // ---- 方式B: MOGRTが無いとき、前回プロジェクトのタイトル（ポイントテキスト）をそのまま複製し、文字だけ差し替える
+    //      各テキストは小さなネスト（中身は前回と同じグラフィック）になり、ダブルクリックで開けば通常どおり編集できる
+    var DESIGN = null, NATIVE_OK = null, textBin = null;
+    function designSeq() {
+        if (DESIGN || !prevSeq) { return DESIGN; }
+        var idx = PLAN.previousProject.titleTrackIndex, src = itemAt(prevSeq.videoTracks[idx], tcToFrames(PLAN.previousProject.titleAt));
+        if (!src) { log('前回タイトルが見つかりません（V' + (idx + 1) + ' ' + PLAN.previousProject.titleAt + '）'); return null; }
+        DESIGN = makeSubsequence(prevSeq, framesOf(src.start), framesOf(src.end), 'デザイン元_前回タイトル');
+        if (!DESIGN) { return null; }
+        for (var v = 0; v < DESIGN.videoTracks.numTracks; v++) { if (v !== idx) { removeItems(DESIGN.videoTracks[v]); } }
+        for (var a = 0; a < DESIGN.audioTracks.numTracks; a++) { removeItems(DESIGN.audioTracks[a]); }
+        textBin = getBin('19_自動編集案_テキスト');
+        return DESIGN;
+    }
+    function rewriteNativeText(ti, text) {
+        for (var k = 0; k < ti.components.numItems; k++) {
+            var p = findProp(ti.components[k], ['ソーステキスト', 'Source Text']);
+            if (!p) { continue; }
+            var v = null;
+            try { v = p.getValue(); } catch (e) { return false; }
+            if (typeof v !== 'string' || v.charAt(0) !== '{') { return false; }   // 中身が読めない版では書き換えない
+            try {
+                var o = parseJSON(v);
+                if (o.textEditValue === undefined) { return false; }
+                o.textEditValue = text;
+                p.setValue(toJSON(o), true);
+                var chk = parseJSON(p.getValue());
+                return chk.textEditValue === text;
+            } catch (e2) { return false; }
+        }
+        return false;
+    }
+    function placeTextNative(vIdx, s, e, text, label, pos, scale) {
+        if (NATIVE_OK === false || !designSeq()) { return null; }
+        var b = seqIds();
+        DESIGN.clone();
+        var n = newSeqSince(b);
+        if (!n.length) { NATIVE_OK = false; return null; }
+        var c = n[0], g = clipsOf(c.videoTracks[PLAN.previousProject.titleTrackIndex])[0];
+        if (!g || !rewriteNativeText(g, text)) {
+            try { app.project.deleteSequence(c); } catch (eD) { }
+            if (NATIVE_OK === null) { log('前回タイトルの文字差し替えは、このPremiereでは使えませんでした'); }
+            NATIVE_OK = false;
+            return null;
+        }
+        NATIVE_OK = true;
+        try { g.end = T(framesOf(g.start) + (e - s)); } catch (eE) { }
+        c.name = label + '_' + oneLine(text);
+        try { c.projectItem.moveBin(textBin); } catch (eB) { }
+        try { seq.videoTracks[vIdx].overwriteClip(c.projectItem, sec(s)); } catch (eO) { }
+        var ti = itemAt(seq.videoTracks[vIdx], s);
+        if (!ti) { return null; }
+        if (framesOf(ti.end) !== e) { try { ti.end = T(e); } catch (eT) { } }
+        if (scale) { setScale(ti, scale); }
+        if (pos) { setPosition(ti, pos[0], pos[1]); }
+        return ti;
+    }
     function placeText(tplFile, vIdx, s, e, text, label, pos) {
-        if (!tplFile) { fail(label + '「' + oneLine(text) + '」', 'テンプレート未用意（README の「テンプレート書き出し」参照）。ポイントテキストで手動作成してください', s, seq); return null; }
+        if (!tplFile) {
+            if (seq.videoTracks.numTracks > vIdx) {
+                var nt = placeTextNative(vIdx, s, e, text, label, pos, pos ? PLAN.diagramTextScale : null);
+                if (nt) {
+                    if (pos) { addMarker(seq, s, null, '確認: ' + label + '「' + oneLine(text) + '」の位置', '前回タイトルを縮小して配置。図形と合わせて位置を微調整', 'white'); }
+                    return nt;
+                }
+            }
+            fail(label + '「' + oneLine(text) + '」', '前回デザインのテキストを自動で複製できませんでした（README「テキストを自動で作れなかったとき」参照）。ポイントテキストで手動作成してください', s, seq);
+            return null;
+        }
         if (seq.videoTracks.numTracks <= vIdx) { fail(label + '「' + oneLine(text) + '」', 'V' + (vIdx + 1) + ' がありません', s, seq); return null; }
         var ti = null;
         try { ti = seq.importMGT(tplFile.fsName, String(s * TPF), vIdx, PLAN.tracks.bgmAudio + 1); } catch (e) { }
@@ -683,6 +728,20 @@
         try { ti.name = label + '_' + oneLine(text); } catch (e3) { }
         return ti;
     }
+    // テキスト用ネストの（空の）音声が話者音声・BGMを上書きしないよう、配置中は音声トラックをロックし、前後で一致を確認する
+    function audioSnapshot() {
+        var out = [], k, j, a;
+        for (k = 0; k < seq.audioTracks.numTracks; k++) {
+            a = clipsOf(seq.audioTracks[k]);
+            for (j = 0; j < a.length; j++) { out.push(k + ':' + a[j].start.ticks + '-' + a[j].end.ticks); }
+        }
+        return out.join('|');
+    }
+    function lockAudio(b) {
+        for (var k = 0; k < seq.audioTracks.numTracks; k++) { try { seq.audioTracks[k].setLocked(b); } catch (e) { } }
+    }
+    var AUDIO_BEFORE = audioSnapshot();
+    lockAudio(true);
     (function () {
         var k, j;
         // ハイライトタイトル
@@ -705,6 +764,23 @@
                 placeText(TPL_DIAG, PLAN.tracks.diagram + (j % PLAN.tracks.diagramCount), mapF(tcToFrames(it.at)), de, it.text, '図解' + d.id, [it.x, it.y]);
             }
         }
+    })();
+    lockAudio(false);
+    (function () {   // 念のため、テキスト用ネストの音声クリップが残っていたら外す
+        var k, j, a, removed = 0;
+        for (k = 0; k < seq.audioTracks.numTracks; k++) {
+            a = clipsOf(seq.audioTracks[k]);
+            for (j = a.length - 1; j >= 0; j--) {
+                try {
+                    if (a[j].projectItem && a[j].projectItem.treePath && textBin && a[j].projectItem.treePath.indexOf(textBin.name) >= 0) { a[j].remove(false, false); removed++; }
+                } catch (e) { }
+            }
+        }
+        if (removed) { log('テキスト用ネストの音声 ' + removed + ' 件を除去'); }
+        if (audioSnapshot() !== AUDIO_BEFORE) {
+            fail('音声の保護チェック', 'テキスト配置の前後で音声トラックの内容が変わりました。話者音声・BGMが上書きされた可能性があります。この確認用プロジェクトは使わず、状況をお知らせください', 0, seq);
+            QC.push('× 音声保護チェック: 不一致（要確認）');
+        } else { QC.push('○ 音声保護チェック: テキスト配置で音声は変化していません'); }
     })();
 
     // ---------------------------------------------------------------- 14. 色補正（Lumetri。後から変更可能）
@@ -813,8 +889,7 @@
                 }
             }
         }
-        if (!preset) { preset = File.openDialog('MP4書き出し用プリセット（H.264 .epr）を選択してください。キャンセルで書き出しを省略します', '*.epr'); }
-        if (!preset) { fail('確認用MP4の書き出し', 'H.264 プリセットが見つかりません。確認用シーケンスを手動で書き出してください', null, null); return; }
+        if (!preset) { fail('確認用MP4の書き出し', 'H.264 プリセットが見つからないため省略しました。確認用シーケンス「' + PLAN.reviewSequenceName + '」を ファイル > 書き出し > メディア で書き出してください', null, null); return; }
         activate(rs);
         var res = null;
         try { res = rs.exportAsMediaDirect(mp4Path, preset.fsName, app.encoder.ENCODE_ENTIRE); } catch (e3) { res = String(e3); }
@@ -861,6 +936,6 @@
         rf.open('w');
         rf.write(out.join('\n') + '\n');
         rf.close();
-        alert('完了しました。\n\n未処理/要確認: ' + FAILS.length + ' 件\nレポート: ' + rf.fsName);
+        finish('完了しました（確認用プロジェクトのみ変更）。\n\n未処理/要確認: ' + FAILS.length + ' 件\nレポート: ' + rf.fsName);
     })();
 })();

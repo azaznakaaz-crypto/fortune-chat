@@ -4,7 +4,7 @@
 ExtendScript may misread UTF-8 without a BOM, so every non-ASCII character is
 escaped as \\uXXXX. The plan file is inlined so the script runs from any folder.
 """
-import json, os, re, sys
+import json, os, re, shutil, stat, sys, zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -76,6 +76,27 @@ def build_doc(plan):
     L.append('')
     L.append('完成尺：**%s**（%d フレーム）。BGM「%s」：%s〜%s（A2）。' % (F(final_end), final_end, pp['bgmName'], F(0), F(op2_at)))
     L.append('')
+    L.append('## 尺の計算根拠')
+    L.append('')
+    L.append('表記の注意：「06:45:11」は **分:秒:フレーム**（6分45秒＋11フレーム＝6分45.37秒）です。「06:17.60」のような小数の秒ではありません。')
+    L.append('')
+    L.append('| 項目 | フレーム | 秒 | 出どころ |')
+    L.append('|---|---:|---:|---|')
+    rows = [('ハイライト①', hls[0][2], '現在 %s〜%s（本編側にも残す＝意図した重複）' % (hls[0][0]['start'], hls[0][0]['end'])),
+            ('ハイライト②', hls[1][2], '現在 %s〜%s（同上）' % (hls[1][0]['start'], hls[1][0]['end'])),
+            ('ハイライト③', hls[2][2], '現在 %s〜%s（同上）' % (hls[2][0]['start'], hls[2][0]['end'])),
+            ('オープニング①', op1, '前回プロジェクト'),
+            ('オープニングトーク', ot_end, '現在 00:00.00〜%s' % plan['openingTalkEnd']),
+            ('オープニング②', op2, '前回プロジェクト'),
+            ('本編', src_end - ot_end, '現在 %s〜%s' % (plan['openingTalkEnd'], plan['sourceDuration']))]
+    for name, n, src in rows:
+        L.append('| %s | %d | %.3f | %s |' % (name, n, n / fps, src))
+    L.append('| **合計** | **%d** | **%.3f** | = %d分%06.3f秒 |' % (final_end, final_end / fps, final_end // fps // 60, final_end / fps % 60))
+    L.append('')
+    L.append('検算：元のカット後動画 %d f（%s）＋ ハイライト %d f ＋ オープニング① %d f ＋ オープニング② %d f ＝ %d f。' % (src_end, plan['sourceDuration'], t, op1, op2, src_end + t + op1 + op2))
+    L.append('')
+    L.append('重複の確認：オープニングトーク（0〜%d f）と本編（%d〜%d f）は境目 %s で接しており、重なりも欠けもありません。重複しているのはハイライト3本だけで、これは「本編側から削除しない」という指示どおりです（同じセリフが冒頭のハイライトと本来の位置で2回流れます）。' % (ot_end, ot_end, src_end, plan['openingTalkEnd']))
+    L.append('')
     L.append('## 強調テロップ・タイトル（V8）')
     L.append('')
     L.append('| 現在 | 完成 | 文言 |')
@@ -109,10 +130,9 @@ def build_doc(plan):
     for z in plan['zoom']:
         L.append('| %s〜%s | %s〜%s | %d%% | %s |' % (z['start'], z['end'], F(mp(z['start'])), F(mp(z['end'])), z['scale'], z['reason']))
     L.append('')
-    tf = plan['telopFix']
-    L.append('## 肩書修正')
+    L.append('## 基本テロップ')
     L.append('')
-    L.append('- 完成 %s〜%s：「%s」→「%s」（複製シーケンスのみ）' % (F(mp(tf['start'])), F(mp(tf['end'])), tf['from'], tf['to']))
+    L.append('- 基本テロップは一切変更しません（位置が後ろへずれるだけ）。肩書「神聖→神性」は最後に手作業で修正します（スクリプトは触れません）。')
     L.append('')
     return '\n'.join(L) + '\n'
 
@@ -127,7 +147,31 @@ def main():
     open(os.path.join(ROOT, 'dist', 'episode19_auto_edit.jsx'), 'w', encoding='ascii', newline='\n').write(out)
     os.makedirs(os.path.join(ROOT, 'docs'), exist_ok=True)
     open(os.path.join(ROOT, 'docs', 'タイムライン計画.md'), 'w', encoding='utf8').write(build_doc(plan))
-    print('built dist/episode19_auto_edit.jsx and docs/タイムライン計画.md')
+    # panel gets the same script
+    pj = os.path.join(ROOT, 'panel', 'jp.az.episode19.autoedit', 'jsx')
+    os.makedirs(pj, exist_ok=True)
+    shutil.copyfile(os.path.join(ROOT, 'dist', 'episode19_auto_edit.jsx'), os.path.join(pj, 'episode19_auto_edit.jsx'))
+    # beginner kit zip
+    kit = os.path.join(ROOT, 'dist', 'episode19_premiere_kit.zip')
+    entries = [('panel/install_panel.command', 'install_panel.command'),
+               ('はじめに_手順書.md', 'はじめに_手順書.md'),
+               ('docs/タイムライン計画.md', 'docs/タイムライン計画.md'),
+               ('docs/素材と未対応項目.md', 'docs/素材と未対応項目.md'),
+               ('dist/episode19_auto_edit.jsx', 'episode19_auto_edit.jsx')]
+    pdir = os.path.join(ROOT, 'panel', 'jp.az.episode19.autoedit')
+    for dp, _, fns in os.walk(pdir):
+        for fn in sorted(fns):
+            full = os.path.join(dp, fn)
+            entries.append((os.path.relpath(full, ROOT), os.path.join('jp.az.episode19.autoedit', os.path.relpath(full, pdir))))
+    with zipfile.ZipFile(kit, 'w', zipfile.ZIP_DEFLATED) as z:
+        for src_rel, arc in entries:
+            info = zipfile.ZipInfo('episode19_premiere_kit/' + arc, date_time=(2026, 11, 4, 0, 0, 0))
+            info.compress_type = zipfile.ZIP_DEFLATED
+            info.create_system = 3
+            mode = 0o755 if arc.endswith('.command') else 0o644
+            info.external_attr = (stat.S_IFREG | mode) << 16
+            z.writestr(info, open(os.path.join(ROOT, src_rel), 'rb').read())
+    print('built dist/episode19_auto_edit.jsx, panel jsx, dist/episode19_premiere_kit.zip and docs/タイムライン計画.md')
 
 
 if __name__ == '__main__':

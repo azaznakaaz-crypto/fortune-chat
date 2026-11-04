@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<style>
+  body { background:#232323; color:#ddd; font:13px -apple-system, "Hiragino Sans", sans-serif; margin:14px; }
+  h1 { font-size:15px; margin:0 0 6px; }
+  p { margin:0 0 12px; line-height:1.5; color:#bbb; }
+  button { display:block; width:100%; padding:10px; margin:0 0 10px; font-size:14px; border-radius:6px; border:1px solid #555; background:#3a3a3a; color:#fff; cursor:pointer; }
+  button.run { background:#2d5d9f; border-color:#3c74c2; }
+  button:disabled { opacity:.5; cursor:default; }
+  pre { white-space:pre-wrap; background:#1a1a1a; padding:8px; border-radius:6px; min-height:60px; font-size:12px; }
+</style>
+</head>
+<body>
+  <h1>19 自動編集（確認用プロジェクト専用）</h1>
+  <p>名前に「確認用」が付いたプロジェクトを開いてから押してください。元のプロジェクトでは動きません。</p>
+  <button id="check">① 確認する（何も変更しません）</button>
+  <button id="run" class="run">② 自動編集を実行する</button>
+  <pre id="out">ここに結果が表示されます。</pre>
+<script>
+  function extRoot() {
+    var p = window.__adobe_cep__.getSystemPath('extension');
+    try { p = decodeURIComponent(p); } catch (e) {}
+    return p.replace(/^file:\/\//, '');
+  }
+  function call(mode) {
+    var out = document.getElementById('out'), btns = document.getElementsByTagName('button'), i;
+    for (i = 0; i < btns.length; i++) { btns[i].disabled = true; }
+    out.textContent = mode === 'check' ? '確認中…' : '実行中…（Premiere に出る確認ダイアログに答えてください。数分かかります）';
+    var file = extRoot() + '/jsx/episode19_auto_edit.jsx';
+    var script = 'EP19_MODE=' + JSON.stringify(mode) + ';$.global.EP19_RESULT="";' +
+                 'try{$.evalFile(' + JSON.stringify(file) + ');}catch(e){$.global.EP19_RESULT="エラー: "+e+" (行 "+e.line+")";}' +
+                 '$.global.EP19_RESULT;';
+    window.__adobe_cep__.evalScript(script, function (r) {
+      out.textContent = r || '終了しました（中止した場合は何も変更していません）。';
+      for (i = 0; i < btns.length; i++) { btns[i].disabled = false; }
+    });
+  }
+  document.getElementById('check').onclick = function () { call('check'); };
+  document.getElementById('run').onclick = function () { call('run'); };
+</script>
+</body>
+</html>

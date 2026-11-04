@@ -15,6 +15,8 @@ const vm = require('vm');
 const [curPath, prevPath, workDir] = process.argv.slice(2);
 const NO_TPL = process.argv.includes('--no-templates');
 const NO_QE = process.argv.includes('--no-qe');
+const JSON_TEXT = process.argv.includes('--json-text');   // ソーステキストがJSONで読める版を想定
+const MODE = process.argv.includes('--check') ? 'check' : 'run';
 const TPS = 254016000000, TPF = TPS / 30;
 const cur = JSON.parse(fs.readFileSync(curPath, 'utf8'));
 const prev = JSON.parse(fs.readFileSync(prevPath, 'utf8'));
@@ -51,7 +53,7 @@ function videoComponents(kind, text) {
     comp('不透明度', 'AE.ADBE Opacity', [new Prop('不透明度', 100)]),
     comp('モーション', 'AE.ADBE Motion', [new Prop('位置', [0.5, 0.5]), new Prop('スケール', 100)]),
   ];
-  if (kind === 'graphic') c.push(comp('テキスト', 'AE.ADBE Text', [new Prop('ソーステキスト', text)]));
+  if (kind === 'graphic') c.push(comp('テキスト', 'AE.ADBE Text', [new Prop('ソーステキスト', JSON_TEXT ? JSON.stringify({ textEditValue: text || '' }) : text)]));
   return c;
 }
 const audioComponents = () => [comp('ボリューム', 'Internal Volume', [new Prop('レベル', 0.1778)])];
@@ -59,6 +61,7 @@ const audioComponents = () => [comp('ボリューム', 'Internal Volume', [new P
 // ------------------------------------------------------------------ project items
 let uid = 0;
 class ProjectItem {
+  get treePath() { let p = this, out = []; while (p) { out.unshift(p.name); p = p.parent; } return '\\' + out.join('\\'); }
   constructor(name, type, extra) {
     this.name = name; this.type = type; this.nodeId = 'n' + (++uid);
     this.children = coll([]); Object.assign(this, extra || {});
@@ -95,7 +98,8 @@ class TrackItem {
   getMGTComponent() { return this.mgt; }
 }
 class Track {
-  constructor(seq, kind) { this.seq = seq; this.kind = kind; this.items = []; }
+  constructor(seq, kind) { this.seq = seq; this.kind = kind; this.items = []; this.locked = false; }
+  setLocked(b) { this.locked = !!b; }
   get clips() { return coll(this.items.slice().sort((a, b) => a._s - b._s)); }
   _overwrite(it) {
     const out = [];
@@ -115,7 +119,7 @@ class Track {
     if (!pi.isStill && !pi.seq) len -= inT;
     if (this.kind === 'video') {
       this._overwrite(new TrackItem(this, s, s + len, { name: pi.name, projectItem: pi, components: videoComponents('clip') }));
-      if (pi.seq || pi.hasAudio) {
+      if ((pi.seq || pi.hasAudio) && !this.seq.audioTracks[0].locked) {
         this.seq.audioTracks[0]._overwrite(new TrackItem(this.seq.audioTracks[0], s, s + len, { name: pi.name, projectItem: pi, components: audioComponents() }));
       }
     } else {
@@ -191,7 +195,7 @@ function buildSeq(fx, mediaName, isMovRe) {
   const media = {};
   const pi = (n) => media[n] || (media[n] = (() => { const p = new ProjectItem(n, 1, { duration: 1e18, hasAudio: /\.(mov|mp4)$/i.test(n), isStill: /\.(png|jpg)$/i.test(n) }); root._add(p); return p; })());
   fx.video.forEach((tr, k) => tr.forEach((c) => {
-    const graphic = !!c.text || c.name === 'グラフィック';
+    const graphic = !!c.text || c.name === 'グラフィック' || !/\.\w{3,4}$|^(01|LINE|白|調整レイヤー)$/.test(c.name);
     const it = new TrackItem(s.videoTracks[k], c.s * TPF, c.e * TPF, { name: c.name, projectItem: graphic ? null : pi(c.name),
       components: videoComponents(graphic ? 'graphic' : 'clip', c.text) });
     it._text = c.text; s.videoTracks[k].items.push(it);
@@ -202,7 +206,7 @@ function buildSeq(fx, mediaName, isMovRe) {
   return s;
 }
 const curSeq = buildSeq(cur);
-const projPath = path.join(workDir, '覚醒体験した人、ディセンション恐れすぎ問題.prproj');
+const projPath = path.join(workDir, '覚醒体験した人、ディセンション恐れすぎ問題_確認用.prproj');
 fs.writeFileSync(projPath, 'mock');
 const prevFile = path.join(workDir, '二極化の時代へ！覚醒する人が手放した5つのもの_修正 1.prproj');
 fs.writeFileSync(prevFile, 'mock');
@@ -213,6 +217,7 @@ const project = {
   get sequences() { const a = sequences.slice(); a.numSequences = a.length; return a; },
   saveAs(p) { this.path = p; fs.writeFileSync(p, 'mock'); },
   save() {},
+  deleteSequence(s) { sequences.splice(sequences.indexOf(s), 1); s.projectItem.parent && s.projectItem.moveBin(new ProjectItem('trash', 2)); return true; },
   importSequences(p, ids) { buildSeq(prev); return true; },
   importFiles(paths, ui, bin) {
     for (const p of paths) bin._add(new ProjectItem(path.basename(p), 1, { isStill: true, file: p }));
@@ -270,6 +275,7 @@ class FsEntry {
   constructor(p) { this.fsName = path.resolve(String(p)); }
   get exists() { return fs.existsSync(this.fsName); }
   get name() { return encodeURI(path.basename(this.fsName)); }
+  get displayName() { return path.basename(this.fsName); }
   get parent() { return new Folder(path.dirname(this.fsName)); }
 }
 class File extends FsEntry {
@@ -300,7 +306,8 @@ const ctx = {
   qe: NO_QE ? undefined : qe,
   Time, ProjectItemType, File: fnFile, Folder: fnFolder,
   alert: (m) => alerts.push(m), confirm: () => true,
-  $: { writeln: () => {} },
+  $: { writeln: () => {}, global: {} },
+  EP19_MODE: MODE,
 };
 if (NO_QE) delete ctx.qe;
 if (NO_TPL) { /* templates folder simply absent */ }
@@ -309,19 +316,20 @@ vm.createContext(ctx);
 vm.runInContext(src, ctx, { filename: 'episode19_auto_edit.jsx' });
 
 // ------------------------------------------------------------------ report
+if (MODE === 'check') { console.log(alerts.join('\n---\n')); console.log('sequences:', sequences.length); process.exit(0); }
 const seq = sequences.find((s) => s.name === '19_ディセンション恐れすぎ問題_自動編集案_v1');
 const F = (t) => { const f = Math.round(t / TPF); return `${String(Math.floor(f / 1800)).padStart(2, '0')}:${String(Math.floor(f / 30) % 60).padStart(2, '0')}:${String(f % 30).padStart(2, '0')}`; };
 console.log('alerts:', alerts.map((a) => a.split('\n')[0]));
 if (!seq) { console.log('NO SEQUENCE'); process.exit(1); }
 console.log('original untouched:', curSeq.name, curSeq.videoTracks[0].items.length, curSeq.markerList.length === 0 && curSeq.videoTracks[0].items[0]._s === 0);
 seq.videoTracks.forEach((t, k) => {
-  const c = t.clips; const head = c.slice(0, 8).map((i) => `${F(i._s)}-${F(i._e)} ${i.name}` + (i.mgt ? ` [${JSON.parse(i.mgt.properties[0].value).textEditValue.replace(/\r/g, '/')}]` : ''));
+  const c = t.clips; const head = c.slice(0, 8).map((i) => `${F(i._s)}-${F(i._e)} ${i.name}` + (i.mgt ? ` [${JSON.parse(i.mgt.properties[0].value).textEditValue.replace(/\r/g, '/')}]` : '') + (i.components[1].properties[1].value !== 100 ? ` scale=${i.components[1].properties[1].value}` : ''));
   console.log(`V${k + 1} (${c.length})`); head.forEach((h) => console.log('   ', h));
 });
 seq.audioTracks.forEach((t, k) => { const c = t.clips; console.log(`A${k + 1} (${c.length})`, c.slice(0, 5).map((i) => `${F(i._s)}-${F(i._e)} ${i.name}`).join(' | ')); });
 const fix = seq.videoTracks[1].items.find((i) => /覚醒起動者/.test(i._text || ''));
 const fixProp = fix && fix.components.find((c) => c.displayName === 'テキスト').properties[0];
-console.log('telop fix:', fix && F(fix._s), fixProp && fixProp.value);
+console.log('basic telop untouched:', fix && F(fix._s), fixProp && fixProp.value);
 console.log('end:', F(seq._end()), 'markers:', seq.markerList.length, 'qe:', qeLog.length);
 const z = seq.videoTracks[0].clips.filter((i) => i.components[1].properties[1].value !== 100);
 console.log('zoomed V1 clips:', z.map((i) => `${F(i._s)}-${F(i._e)}=${i.components[1].properties[1].value}`).join(', '));

@@ -17,7 +17,9 @@ var PLAN = {
     "opening2": { "start": "01:03.60", "end": "01:10.47", "dropAudio": false },
     "bgmName": "全ては一つ日本語 (1).m4a",
     "bgmTrackIndex": 2,
-    "bgmClipStart": "00:16.17"
+    "bgmClipStart": "00:16.17",
+    "titleTrackIndex": 3,
+    "titleAt": "00:00.00"
   },
 
   "highlights": [
@@ -93,7 +95,7 @@ var PLAN = {
       "shapes": "04:30.40「体験を所有する」に細い×。04:46.37 左→右へ水や光が流れるような柔らかい矢印。" }
   ],
 
-  "telopFix": { "start": "00:35.17", "end": "00:37.80", "from": "神聖覚醒起動者", "to": "神性覚醒起動者" },
+  "diagramTextScale": 60,
 
   "color": {
     "exposure": -0.2, "contrast": 8, "highlights": -30, "whites": -15, "saturation": 95,
