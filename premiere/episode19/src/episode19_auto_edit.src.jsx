@@ -102,16 +102,12 @@
     var OP1_AT = HL_TOTAL;
     // オープニング②は、オープニングトークの途中（現在 PLAN.opening2At＝「今日はお話ししていきたいと思います」の後、
     // 「こんにちは 意識の専門家」の前）に入れる
-    // さらに本編の直前（現在 PLAN.openingTalkEnd）にもオープニング②を入れる（2か所）
     var OP2_SRC = tcToFrames(PLAN.opening2At);
-    var OP2_AT = OP2_SRC + PRE;                     // 1か所目（自己紹介の前）
-    var TALK2_SHIFT = PRE + OP2_LEN;                // オープニングトーク後半のずれ
-    var OP2B_AT = OT_END + TALK2_SHIFT;             // 2か所目（本編の前）
-    var MAIN_SHIFT = PRE + 2 * OP2_LEN;             // 本編のずれ
+    var OP2_AT = OP2_SRC + PRE;
+    var MAIN_SHIFT = PRE + OP2_LEN;                 // OP2_SRC 以降（自己紹介〜本編）のずれ
     var FINAL_END = SRC_END + MAIN_SHIFT;
     var MAIN_AT = OT_END + MAIN_SHIFT;              // 本編の開始位置
-    function shiftOf(srcFrame) { return srcFrame < OP2_SRC ? PRE : (srcFrame < OT_END ? TALK2_SHIFT : MAIN_SHIFT); }
-    function mapF(srcFrame) { return srcFrame + shiftOf(srcFrame); }
+    function mapF(srcFrame) { return srcFrame < OP2_SRC ? srcFrame + PRE : srcFrame + MAIN_SHIFT; }
 
     // ---------------------------------------------------------------- project helpers
     function allItems(root, out) {
@@ -504,15 +500,15 @@
                 a.sort(function (x, y) { return Number(y.start.ticks) - Number(x.start.ticks); });
                 for (j = 0; j < a.length; j++) {
                     var s = framesOf(a[j].start), e = framesOf(a[j].end);
-                    if ((s < OP2_SRC && e > OP2_SRC) || (s < OT_END && e > OT_END)) { straddle++; }
+                    if (s < OP2_SRC && e > OP2_SRC) { straddle++; }
                     var off = new Time();
-                    off.ticks = String(shiftOf(s) * TPF);
+                    off.ticks = String((s >= OP2_SRC ? MAIN_SHIFT : PRE) * TPF);
                     try { a[j].move(off); moved++; } catch (eM) { log('移動失敗 ' + a[j].name + ' @' + fmt(s) + ': ' + eM); }
                 }
             }
         }
-        log('既存クリップ移動: ' + moved + ' 件（〜' + PLAN.opening2At + ' は +' + PRE + 'f / 〜' + PLAN.openingTalkEnd + ' は +' + TALK2_SHIFT + 'f / 本編は +' + MAIN_SHIFT + 'f）');
-        if (straddle) { fail('オープニング②の挿入位置', straddle + ' 個のクリップが ' + PLAN.opening2At + ' または ' + PLAN.openingTalkEnd + ' をまたいでいます', OP2_AT, seq); }
+        log('既存クリップ移動: ' + moved + ' 件（〜' + PLAN.opening2At + ' は +' + PRE + 'f / ' + PLAN.opening2At + '〜 は +' + MAIN_SHIFT + 'f）');
+        if (straddle) { fail('オープニング②の挿入位置', straddle + ' 個のクリップが ' + PLAN.opening2At + ' をまたいでいます', OP2_AT, seq); }
         for (k = 0; k < csvMarkers.length; k++) {
             var cm = csvMarkers[k];
             try { cm.marker.start = sec(mapF(cm.start)); cm.marker.end = sec(mapF(cm.start) + (cm.end - cm.start)); }
@@ -534,10 +530,9 @@
     var HL_ITEMS = [];
     for (i = 0; i < HL.length; i++) { HL_ITEMS.push(placeNest(HL[i].seq, HL[i].dstStart, ['ハイライト①', 'ハイライト②', 'ハイライト③'][i])); }
     placeNest(OP[0], OP1_AT, 'オープニング①');
-    placeNest(OP[1], OP2_AT, 'オープニング②（自己紹介の前）');
-    placeNest(OP[1], OP2B_AT, 'オープニング②（本編の前）');
+    placeNest(OP[1], OP2_AT, 'オープニング②');
     addMarker(seq, PRE, OP2_AT, 'オープニングトーク（前半）', '現在 00:00.00〜' + PLAN.opening2At + '。最初の約3秒はインサートなし', 'yellow');
-    addMarker(seq, OP2_AT + OP2_LEN, OP2B_AT, 'オープニングトーク（後半・自己紹介〜）', '現在 ' + PLAN.opening2At + '〜' + PLAN.openingTalkEnd, 'yellow');
+    addMarker(seq, OP2_AT + OP2_LEN, MAIN_AT, 'オープニングトーク（後半・自己紹介〜）', '現在 ' + PLAN.opening2At + '〜' + PLAN.openingTalkEnd, 'yellow');
     addMarker(seq, MAIN_AT, FINAL_END, '本編', '現在 ' + PLAN.openingTalkEnd + '〜' + PLAN.sourceDuration, 'yellow');
 
     // short fades between highlights (opacity + audio level, no SE)
@@ -891,7 +886,7 @@
         // order / length
         QC.push('想定全長: ' + fmt(FINAL_END) + ' / 実際: ' + fmt(framesOf(seq.end)));
         QC.push('構成: HL① 00:00:00 → HL② ' + fmt(HL[1].dstStart) + ' → HL③ ' + fmt(HL[2].dstStart) + ' → OP① ' + fmt(OP1_AT) +
-            ' → オープニングトーク前半 ' + fmt(PRE) + ' → OP② ' + fmt(OP2_AT) + ' → オープニングトーク後半 ' + fmt(OP2_AT + OP2_LEN) + ' → OP② ' + fmt(OP2B_AT) + ' → 本編 ' + fmt(MAIN_AT));
+            ' → オープニングトーク前半 ' + fmt(PRE) + ' → OP② ' + fmt(OP2_AT) + ' → オープニングトーク後半 ' + fmt(OP2_AT + OP2_LEN) + ' → 本編 ' + fmt(MAIN_AT));
         QC.push('テロップのはみ出し・インサートの文頭/文末・音の切れ: 自動判定できないため、確認用MP4で目視確認してください');
     })();
     function tcToFramesFromFmt(s) { var p = s.split(':'); return (parseInt(p[0], 10) * 60 + parseInt(p[1], 10)) * PLAN.fps + parseInt(p[2], 10); }
