@@ -569,7 +569,8 @@
         var aIdx = PLAN.tracks.bgmAudio;
         if (!BGM) { fail('BGM（' + PLAN.previousProject.bgmName + '）', '前回プロジェクトからBGMクリップを取得できませんでした', 0, seq); return; }
         if (seq.audioTracks.numTracks <= aIdx) { fail('BGM', 'A' + (aIdx + 1) + ' がありません', 0, seq); return; }
-        // オープニング②（専用BGMあり）の前後に分けて置く。後半は前半の続きから流す
+        // BGMはハイライト〜オープニングトーク前半のみ。オープニング②は前回の専用BGM、
+        // 「こんにちは 意識の専門家」（オープニングトーク後半）以降はBGMなし（ご指示）
         function bed(startF, endF, inSec, fadeInF, fadeOutF, label) {
             try {
                 BGM.item.setInPoint(inSec, 4);
@@ -588,8 +589,7 @@
             } catch (e) { fail('BGM 配置（' + label + '）', String(e), startF, seq); }
         }
         bed(0, OP2_AT, BGM.inSec, 10, 15, 'ハイライト〜オープニングトーク前半');
-        bed(OP2_AT + OP2_LEN, MAIN_AT, BGM.inSec + sec(OP2_AT), 15, 30, 'オープニングトーク後半');
-        USED.push(BGM.item.name + '（BGM・前回プロジェクトと同じ音量 ' + BGM.level + '。オープニング②の間は前回のOP②専用BGM）');
+        USED.push(BGM.item.name + '（BGM・前回プロジェクトと同じ音量 ' + BGM.level + '。00:00〜オープニング②の手前まで。「こんにちは」以降はBGMなし）');
     })();
 
     // ---------------------------------------------------------------- 11. 画角（カット点のみ・途中ズームなし）

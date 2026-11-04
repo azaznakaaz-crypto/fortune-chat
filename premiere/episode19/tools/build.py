@@ -77,7 +77,7 @@ def build_doc(plan):
     L.append('| 7 | オープニングトーク後半 | %s | %s | %df | 現在 %s〜%s（「こんにちは 意識の専門家」〜） |' % (F(op2_at + op2), F(main_at), ot_end - op2_src, plan['opening2At'], plan['openingTalkEnd']))
     L.append('| 8 | 本編 | %s | %s | %df | 現在 %s〜%s |' % (F(main_at), F(final_end), src_end - ot_end, plan['openingTalkEnd'], plan['sourceDuration']))
     L.append('')
-    L.append('完成尺：**%s**（%d フレーム）。BGM「%s」（A2）：%s〜%s と %s〜%s（後半は前半の続きから）。オープニング②の間は前回のOP②専用BGM。' % (F(final_end), final_end, pp['bgmName'], F(0), F(op2_at), F(op2_at + op2), F(main_at)))
+    L.append('完成尺：**%s**（%d フレーム）。BGM「%s」（A2）：%s〜%s のみ。オープニング②の間は前回のOP②専用BGM。「こんにちは 意識の専門家」（%s）以降はBGMなし。' % (F(final_end), final_end, pp['bgmName'], F(0), F(op2_at), F(op2_at + op2)))
     L.append('')
     L.append('## 尺の計算根拠')
     L.append('')
