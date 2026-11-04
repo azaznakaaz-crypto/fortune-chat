@@ -100,10 +100,14 @@
     var OP2_LEN = tcToFrames(PLAN.previousProject.opening2.end) - tcToFrames(PLAN.previousProject.opening2.start);
     var PRE = HL_TOTAL + OP1_LEN;                 // オープニングトークの開始位置
     var OP1_AT = HL_TOTAL;
-    var OP2_AT = OT_END + PRE;
-    var MAIN_SHIFT = PRE + OP2_LEN;
+    // オープニング②は、オープニングトークの途中（現在 PLAN.opening2At＝「今日はお話ししていきたいと思います」の後、
+    // 「こんにちは 意識の専門家」の前）に入れる
+    var OP2_SRC = tcToFrames(PLAN.opening2At);
+    var OP2_AT = OP2_SRC + PRE;
+    var MAIN_SHIFT = PRE + OP2_LEN;                 // OP2_SRC 以降（自己紹介〜本編）のずれ
     var FINAL_END = SRC_END + MAIN_SHIFT;
-    function mapF(srcFrame) { return srcFrame < OT_END ? srcFrame + PRE : srcFrame + MAIN_SHIFT; }
+    var MAIN_AT = OT_END + MAIN_SHIFT;              // 本編の開始位置
+    function mapF(srcFrame) { return srcFrame < OP2_SRC ? srcFrame + PRE : srcFrame + MAIN_SHIFT; }
 
     // ---------------------------------------------------------------- project helpers
     function allItems(root, out) {
@@ -496,15 +500,15 @@
                 a.sort(function (x, y) { return Number(y.start.ticks) - Number(x.start.ticks); });
                 for (j = 0; j < a.length; j++) {
                     var s = framesOf(a[j].start), e = framesOf(a[j].end);
-                    if (s < OT_END && e > OT_END) { straddle++; }
+                    if (s < OP2_SRC && e > OP2_SRC) { straddle++; }
                     var off = new Time();
-                    off.ticks = String((s >= OT_END ? MAIN_SHIFT : PRE) * TPF);
+                    off.ticks = String((s >= OP2_SRC ? MAIN_SHIFT : PRE) * TPF);
                     try { a[j].move(off); moved++; } catch (eM) { log('移動失敗 ' + a[j].name + ' @' + fmt(s) + ': ' + eM); }
                 }
             }
         }
-        log('既存クリップ移動: ' + moved + ' 件（オープニングトーク +' + PRE + 'f / 本編 +' + MAIN_SHIFT + 'f）');
-        if (straddle) { fail('オープニングトーク/本編の境界', straddle + ' 個のクリップが ' + PLAN.openingTalkEnd + ' をまたいでいます', OP2_AT, seq); }
+        log('既存クリップ移動: ' + moved + ' 件（〜' + PLAN.opening2At + ' は +' + PRE + 'f / ' + PLAN.opening2At + '〜 は +' + MAIN_SHIFT + 'f）');
+        if (straddle) { fail('オープニング②の挿入位置', straddle + ' 個のクリップが ' + PLAN.opening2At + ' をまたいでいます', OP2_AT, seq); }
         for (k = 0; k < csvMarkers.length; k++) {
             var cm = csvMarkers[k];
             try { cm.marker.start = sec(mapF(cm.start)); cm.marker.end = sec(mapF(cm.start) + (cm.end - cm.start)); }
@@ -527,8 +531,9 @@
     for (i = 0; i < HL.length; i++) { HL_ITEMS.push(placeNest(HL[i].seq, HL[i].dstStart, ['ハイライト①', 'ハイライト②', 'ハイライト③'][i])); }
     placeNest(OP[0], OP1_AT, 'オープニング①');
     placeNest(OP[1], OP2_AT, 'オープニング②');
-    addMarker(seq, PRE, OP2_AT, 'オープニングトーク', '現在 00:00.00〜' + PLAN.openingTalkEnd + '。最初の約3秒はインサートなし', 'yellow');
-    addMarker(seq, OP2_AT + OP2_LEN, FINAL_END, '本編', '現在 ' + PLAN.openingTalkEnd + '〜' + PLAN.sourceDuration, 'yellow');
+    addMarker(seq, PRE, OP2_AT, 'オープニングトーク（前半）', '現在 00:00.00〜' + PLAN.opening2At + '。最初の約3秒はインサートなし', 'yellow');
+    addMarker(seq, OP2_AT + OP2_LEN, MAIN_AT, 'オープニングトーク（後半・自己紹介〜）', '現在 ' + PLAN.opening2At + '〜' + PLAN.openingTalkEnd, 'yellow');
+    addMarker(seq, MAIN_AT, FINAL_END, '本編', '現在 ' + PLAN.openingTalkEnd + '〜' + PLAN.sourceDuration, 'yellow');
 
     // short fades between highlights (opacity + audio level, no SE)
     (function () {
@@ -564,23 +569,27 @@
         var aIdx = PLAN.tracks.bgmAudio;
         if (!BGM) { fail('BGM（' + PLAN.previousProject.bgmName + '）', '前回プロジェクトからBGMクリップを取得できませんでした', 0, seq); return; }
         if (seq.audioTracks.numTracks <= aIdx) { fail('BGM', 'A' + (aIdx + 1) + ' がありません', 0, seq); return; }
-        var endF = OP2_AT;
-        try {
-            BGM.item.setInPoint(BGM.inSec, 4);
-            seq.audioTracks[aIdx].overwriteClip(BGM.item, 0);
-            try { BGM.item.clearInOutPoints(); } catch (eC) { }
-            var ti = itemAt(seq.audioTracks[aIdx], 0);
-            if (!ti) { throw new Error('配置後のクリップが見つかりません'); }
-            if (framesOf(ti.end) > endF) { ti.end = T(endF); }
-            if (framesOf(ti.end) < endF) { fail('BGMの長さ', 'BGM素材がオープニングトーク終了まで届きません（' + fmt(framesOf(ti.end)) + 'で終了）', framesOf(ti.end), seq); }
-            var lp = levelProp(ti);
-            if (lp && BGM.level !== null) {
-                var a = ti.inPoint.seconds, b = ti.outPoint.seconds;
-                keyframe(lp, [[a, 0], [a + sec(10), BGM.level], [b - sec(30), BGM.level], [b, 0]]);
-            }
-            USED.push(BGM.item.name + '（BGM・前回プロジェクトと同じ音量 ' + BGM.level + '）');
-            log('BGM 配置 A' + (aIdx + 1) + ' 00:00:00〜' + fmt(endF));
-        } catch (e) { fail('BGM 配置', String(e), 0, seq); }
+        // オープニング②（専用BGMあり）の前後に分けて置く。後半は前半の続きから流す
+        function bed(startF, endF, inSec, fadeInF, fadeOutF, label) {
+            try {
+                BGM.item.setInPoint(inSec, 4);
+                seq.audioTracks[aIdx].overwriteClip(BGM.item, sec(startF));
+                try { BGM.item.clearInOutPoints(); } catch (eC) { }
+                var ti = itemAt(seq.audioTracks[aIdx], startF);
+                if (!ti) { throw new Error('配置後のクリップが見つかりません'); }
+                if (framesOf(ti.end) > endF) { ti.end = T(endF); }
+                if (framesOf(ti.end) < endF) { fail('BGMの長さ（' + label + '）', 'BGM素材が ' + fmt(endF) + ' まで届きません（' + fmt(framesOf(ti.end)) + 'で終了）', framesOf(ti.end), seq); }
+                var lp = levelProp(ti);
+                if (lp && BGM.level !== null) {
+                    var a = ti.inPoint.seconds, b = ti.outPoint.seconds;
+                    keyframe(lp, [[a, 0], [a + sec(fadeInF), BGM.level], [b - sec(fadeOutF), BGM.level], [b, 0]]);
+                }
+                log('BGM 配置（' + label + '） A' + (aIdx + 1) + ' ' + fmt(startF) + '〜' + fmt(endF));
+            } catch (e) { fail('BGM 配置（' + label + '）', String(e), startF, seq); }
+        }
+        bed(0, OP2_AT, BGM.inSec, 10, 15, 'ハイライト〜オープニングトーク前半');
+        bed(OP2_AT + OP2_LEN, MAIN_AT, BGM.inSec + sec(OP2_AT), 15, 30, 'オープニングトーク後半');
+        USED.push(BGM.item.name + '（BGM・前回プロジェクトと同じ音量 ' + BGM.level + '。オープニング②の間は前回のOP②専用BGM）');
     })();
 
     // ---------------------------------------------------------------- 11. 画角（カット点のみ・途中ズームなし）
@@ -877,7 +886,7 @@
         // order / length
         QC.push('想定全長: ' + fmt(FINAL_END) + ' / 実際: ' + fmt(framesOf(seq.end)));
         QC.push('構成: HL① 00:00:00 → HL② ' + fmt(HL[1].dstStart) + ' → HL③ ' + fmt(HL[2].dstStart) + ' → OP① ' + fmt(OP1_AT) +
-            ' → オープニングトーク ' + fmt(PRE) + ' → OP② ' + fmt(OP2_AT) + ' → 本編 ' + fmt(OP2_AT + OP2_LEN));
+            ' → オープニングトーク前半 ' + fmt(PRE) + ' → OP② ' + fmt(OP2_AT) + ' → オープニングトーク後半 ' + fmt(OP2_AT + OP2_LEN) + ' → 本編 ' + fmt(MAIN_AT));
         QC.push('テロップのはみ出し・インサートの文頭/文末・音の切れ: 自動判定できないため、確認用MP4で目視確認してください');
     })();
     function tcToFramesFromFmt(s) { var p = s.split(':'); return (parseInt(p[0], 10) * 60 + parseInt(p[1], 10)) * PLAN.fps + parseInt(p[2], 10); }

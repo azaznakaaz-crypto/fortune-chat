@@ -24,6 +24,7 @@ var PLAN = {
   "sourceSequenceName": "\u899A\u9192\u4F53\u9A13\u3057\u305F\u4EBA\u3001\u30C7\u30A3\u30BB\u30F3\u30B7\u30E7\u30F3\u6050\u308C\u3059\u304E\u554F\u984C",
   "sourceDuration": "06:17.60",
   "openingTalkEnd": "01:01.53",
+  "opening2At": "00:33.10",
 
   "previousProject": {
     "fileName": "\u4E8C\u6975\u5316\u306E\u6642\u4EE3\u3078\uFF01\u899A\u9192\u3059\u308B\u4EBA\u304C\u624B\u653E\u3057\u305F5\u3064\u306E\u3082\u306E_\u4FEE\u6B63 1.prproj",
@@ -210,10 +211,14 @@ var PLAN = {
     var OP2_LEN = tcToFrames(PLAN.previousProject.opening2.end) - tcToFrames(PLAN.previousProject.opening2.start);
     var PRE = HL_TOTAL + OP1_LEN;                 // \u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u30C8\u30FC\u30AF\u306E\u958B\u59CB\u4F4D\u7F6E
     var OP1_AT = HL_TOTAL;
-    var OP2_AT = OT_END + PRE;
-    var MAIN_SHIFT = PRE + OP2_LEN;
+    // \u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u2461\u306F\u3001\u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u30C8\u30FC\u30AF\u306E\u9014\u4E2D\uFF08\u73FE\u5728 PLAN.opening2At\uFF1D\u300C\u4ECA\u65E5\u306F\u304A\u8A71\u3057\u3057\u3066\u3044\u304D\u305F\u3044\u3068\u601D\u3044\u307E\u3059\u300D\u306E\u5F8C\u3001
+    // \u300C\u3053\u3093\u306B\u3061\u306F \u610F\u8B58\u306E\u5C02\u9580\u5BB6\u300D\u306E\u524D\uFF09\u306B\u5165\u308C\u308B
+    var OP2_SRC = tcToFrames(PLAN.opening2At);
+    var OP2_AT = OP2_SRC + PRE;
+    var MAIN_SHIFT = PRE + OP2_LEN;                 // OP2_SRC \u4EE5\u964D\uFF08\u81EA\u5DF1\u7D39\u4ECB\u301C\u672C\u7DE8\uFF09\u306E\u305A\u308C
     var FINAL_END = SRC_END + MAIN_SHIFT;
-    function mapF(srcFrame) { return srcFrame < OT_END ? srcFrame + PRE : srcFrame + MAIN_SHIFT; }
+    var MAIN_AT = OT_END + MAIN_SHIFT;              // \u672C\u7DE8\u306E\u958B\u59CB\u4F4D\u7F6E
+    function mapF(srcFrame) { return srcFrame < OP2_SRC ? srcFrame + PRE : srcFrame + MAIN_SHIFT; }
 
     // ---------------------------------------------------------------- project helpers
     function allItems(root, out) {
@@ -606,15 +611,15 @@ var PLAN = {
                 a.sort(function (x, y) { return Number(y.start.ticks) - Number(x.start.ticks); });
                 for (j = 0; j < a.length; j++) {
                     var s = framesOf(a[j].start), e = framesOf(a[j].end);
-                    if (s < OT_END && e > OT_END) { straddle++; }
+                    if (s < OP2_SRC && e > OP2_SRC) { straddle++; }
                     var off = new Time();
-                    off.ticks = String((s >= OT_END ? MAIN_SHIFT : PRE) * TPF);
+                    off.ticks = String((s >= OP2_SRC ? MAIN_SHIFT : PRE) * TPF);
                     try { a[j].move(off); moved++; } catch (eM) { log('\u79FB\u52D5\u5931\u6557 ' + a[j].name + ' @' + fmt(s) + ': ' + eM); }
                 }
             }
         }
-        log('\u65E2\u5B58\u30AF\u30EA\u30C3\u30D7\u79FB\u52D5: ' + moved + ' \u4EF6\uFF08\u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u30C8\u30FC\u30AF +' + PRE + 'f / \u672C\u7DE8 +' + MAIN_SHIFT + 'f\uFF09');
-        if (straddle) { fail('\u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u30C8\u30FC\u30AF/\u672C\u7DE8\u306E\u5883\u754C', straddle + ' \u500B\u306E\u30AF\u30EA\u30C3\u30D7\u304C ' + PLAN.openingTalkEnd + ' \u3092\u307E\u305F\u3044\u3067\u3044\u307E\u3059', OP2_AT, seq); }
+        log('\u65E2\u5B58\u30AF\u30EA\u30C3\u30D7\u79FB\u52D5: ' + moved + ' \u4EF6\uFF08\u301C' + PLAN.opening2At + ' \u306F +' + PRE + 'f / ' + PLAN.opening2At + '\u301C \u306F +' + MAIN_SHIFT + 'f\uFF09');
+        if (straddle) { fail('\u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u2461\u306E\u633F\u5165\u4F4D\u7F6E', straddle + ' \u500B\u306E\u30AF\u30EA\u30C3\u30D7\u304C ' + PLAN.opening2At + ' \u3092\u307E\u305F\u3044\u3067\u3044\u307E\u3059', OP2_AT, seq); }
         for (k = 0; k < csvMarkers.length; k++) {
             var cm = csvMarkers[k];
             try { cm.marker.start = sec(mapF(cm.start)); cm.marker.end = sec(mapF(cm.start) + (cm.end - cm.start)); }
@@ -637,8 +642,9 @@ var PLAN = {
     for (i = 0; i < HL.length; i++) { HL_ITEMS.push(placeNest(HL[i].seq, HL[i].dstStart, ['\u30CF\u30A4\u30E9\u30A4\u30C8\u2460', '\u30CF\u30A4\u30E9\u30A4\u30C8\u2461', '\u30CF\u30A4\u30E9\u30A4\u30C8\u2462'][i])); }
     placeNest(OP[0], OP1_AT, '\u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u2460');
     placeNest(OP[1], OP2_AT, '\u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u2461');
-    addMarker(seq, PRE, OP2_AT, '\u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u30C8\u30FC\u30AF', '\u73FE\u5728 00:00.00\u301C' + PLAN.openingTalkEnd + '\u3002\u6700\u521D\u306E\u7D043\u79D2\u306F\u30A4\u30F3\u30B5\u30FC\u30C8\u306A\u3057', 'yellow');
-    addMarker(seq, OP2_AT + OP2_LEN, FINAL_END, '\u672C\u7DE8', '\u73FE\u5728 ' + PLAN.openingTalkEnd + '\u301C' + PLAN.sourceDuration, 'yellow');
+    addMarker(seq, PRE, OP2_AT, '\u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u30C8\u30FC\u30AF\uFF08\u524D\u534A\uFF09', '\u73FE\u5728 00:00.00\u301C' + PLAN.opening2At + '\u3002\u6700\u521D\u306E\u7D043\u79D2\u306F\u30A4\u30F3\u30B5\u30FC\u30C8\u306A\u3057', 'yellow');
+    addMarker(seq, OP2_AT + OP2_LEN, MAIN_AT, '\u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u30C8\u30FC\u30AF\uFF08\u5F8C\u534A\u30FB\u81EA\u5DF1\u7D39\u4ECB\u301C\uFF09', '\u73FE\u5728 ' + PLAN.opening2At + '\u301C' + PLAN.openingTalkEnd, 'yellow');
+    addMarker(seq, MAIN_AT, FINAL_END, '\u672C\u7DE8', '\u73FE\u5728 ' + PLAN.openingTalkEnd + '\u301C' + PLAN.sourceDuration, 'yellow');
 
     // short fades between highlights (opacity + audio level, no SE)
     (function () {
@@ -674,23 +680,27 @@ var PLAN = {
         var aIdx = PLAN.tracks.bgmAudio;
         if (!BGM) { fail('BGM\uFF08' + PLAN.previousProject.bgmName + '\uFF09', '\u524D\u56DE\u30D7\u30ED\u30B8\u30A7\u30AF\u30C8\u304B\u3089BGM\u30AF\u30EA\u30C3\u30D7\u3092\u53D6\u5F97\u3067\u304D\u307E\u305B\u3093\u3067\u3057\u305F', 0, seq); return; }
         if (seq.audioTracks.numTracks <= aIdx) { fail('BGM', 'A' + (aIdx + 1) + ' \u304C\u3042\u308A\u307E\u305B\u3093', 0, seq); return; }
-        var endF = OP2_AT;
-        try {
-            BGM.item.setInPoint(BGM.inSec, 4);
-            seq.audioTracks[aIdx].overwriteClip(BGM.item, 0);
-            try { BGM.item.clearInOutPoints(); } catch (eC) { }
-            var ti = itemAt(seq.audioTracks[aIdx], 0);
-            if (!ti) { throw new Error('\u914D\u7F6E\u5F8C\u306E\u30AF\u30EA\u30C3\u30D7\u304C\u898B\u3064\u304B\u308A\u307E\u305B\u3093'); }
-            if (framesOf(ti.end) > endF) { ti.end = T(endF); }
-            if (framesOf(ti.end) < endF) { fail('BGM\u306E\u9577\u3055', 'BGM\u7D20\u6750\u304C\u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u30C8\u30FC\u30AF\u7D42\u4E86\u307E\u3067\u5C4A\u304D\u307E\u305B\u3093\uFF08' + fmt(framesOf(ti.end)) + '\u3067\u7D42\u4E86\uFF09', framesOf(ti.end), seq); }
-            var lp = levelProp(ti);
-            if (lp && BGM.level !== null) {
-                var a = ti.inPoint.seconds, b = ti.outPoint.seconds;
-                keyframe(lp, [[a, 0], [a + sec(10), BGM.level], [b - sec(30), BGM.level], [b, 0]]);
-            }
-            USED.push(BGM.item.name + '\uFF08BGM\u30FB\u524D\u56DE\u30D7\u30ED\u30B8\u30A7\u30AF\u30C8\u3068\u540C\u3058\u97F3\u91CF ' + BGM.level + '\uFF09');
-            log('BGM \u914D\u7F6E A' + (aIdx + 1) + ' 00:00:00\u301C' + fmt(endF));
-        } catch (e) { fail('BGM \u914D\u7F6E', String(e), 0, seq); }
+        // \u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u2461\uFF08\u5C02\u7528BGM\u3042\u308A\uFF09\u306E\u524D\u5F8C\u306B\u5206\u3051\u3066\u7F6E\u304F\u3002\u5F8C\u534A\u306F\u524D\u534A\u306E\u7D9A\u304D\u304B\u3089\u6D41\u3059
+        function bed(startF, endF, inSec, fadeInF, fadeOutF, label) {
+            try {
+                BGM.item.setInPoint(inSec, 4);
+                seq.audioTracks[aIdx].overwriteClip(BGM.item, sec(startF));
+                try { BGM.item.clearInOutPoints(); } catch (eC) { }
+                var ti = itemAt(seq.audioTracks[aIdx], startF);
+                if (!ti) { throw new Error('\u914D\u7F6E\u5F8C\u306E\u30AF\u30EA\u30C3\u30D7\u304C\u898B\u3064\u304B\u308A\u307E\u305B\u3093'); }
+                if (framesOf(ti.end) > endF) { ti.end = T(endF); }
+                if (framesOf(ti.end) < endF) { fail('BGM\u306E\u9577\u3055\uFF08' + label + '\uFF09', 'BGM\u7D20\u6750\u304C ' + fmt(endF) + ' \u307E\u3067\u5C4A\u304D\u307E\u305B\u3093\uFF08' + fmt(framesOf(ti.end)) + '\u3067\u7D42\u4E86\uFF09', framesOf(ti.end), seq); }
+                var lp = levelProp(ti);
+                if (lp && BGM.level !== null) {
+                    var a = ti.inPoint.seconds, b = ti.outPoint.seconds;
+                    keyframe(lp, [[a, 0], [a + sec(fadeInF), BGM.level], [b - sec(fadeOutF), BGM.level], [b, 0]]);
+                }
+                log('BGM \u914D\u7F6E\uFF08' + label + '\uFF09 A' + (aIdx + 1) + ' ' + fmt(startF) + '\u301C' + fmt(endF));
+            } catch (e) { fail('BGM \u914D\u7F6E\uFF08' + label + '\uFF09', String(e), startF, seq); }
+        }
+        bed(0, OP2_AT, BGM.inSec, 10, 15, '\u30CF\u30A4\u30E9\u30A4\u30C8\u301C\u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u30C8\u30FC\u30AF\u524D\u534A');
+        bed(OP2_AT + OP2_LEN, MAIN_AT, BGM.inSec + sec(OP2_AT), 15, 30, '\u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u30C8\u30FC\u30AF\u5F8C\u534A');
+        USED.push(BGM.item.name + '\uFF08BGM\u30FB\u524D\u56DE\u30D7\u30ED\u30B8\u30A7\u30AF\u30C8\u3068\u540C\u3058\u97F3\u91CF ' + BGM.level + '\u3002\u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u2461\u306E\u9593\u306F\u524D\u56DE\u306EOP\u2461\u5C02\u7528BGM\uFF09');
     })();
 
     // ---------------------------------------------------------------- 11. \u753B\u89D2\uFF08\u30AB\u30C3\u30C8\u70B9\u306E\u307F\u30FB\u9014\u4E2D\u30BA\u30FC\u30E0\u306A\u3057\uFF09
@@ -987,7 +997,7 @@ var PLAN = {
         // order / length
         QC.push('\u60F3\u5B9A\u5168\u9577: ' + fmt(FINAL_END) + ' / \u5B9F\u969B: ' + fmt(framesOf(seq.end)));
         QC.push('\u69CB\u6210: HL\u2460 00:00:00 \u2192 HL\u2461 ' + fmt(HL[1].dstStart) + ' \u2192 HL\u2462 ' + fmt(HL[2].dstStart) + ' \u2192 OP\u2460 ' + fmt(OP1_AT) +
-            ' \u2192 \u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u30C8\u30FC\u30AF ' + fmt(PRE) + ' \u2192 OP\u2461 ' + fmt(OP2_AT) + ' \u2192 \u672C\u7DE8 ' + fmt(OP2_AT + OP2_LEN));
+            ' \u2192 \u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u30C8\u30FC\u30AF\u524D\u534A ' + fmt(PRE) + ' \u2192 OP\u2461 ' + fmt(OP2_AT) + ' \u2192 \u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u30C8\u30FC\u30AF\u5F8C\u534A ' + fmt(OP2_AT + OP2_LEN) + ' \u2192 \u672C\u7DE8 ' + fmt(MAIN_AT));
         QC.push('\u30C6\u30ED\u30C3\u30D7\u306E\u306F\u307F\u51FA\u3057\u30FB\u30A4\u30F3\u30B5\u30FC\u30C8\u306E\u6587\u982D/\u6587\u672B\u30FB\u97F3\u306E\u5207\u308C: \u81EA\u52D5\u5224\u5B9A\u3067\u304D\u306A\u3044\u305F\u3081\u3001\u78BA\u8A8D\u7528MP4\u3067\u76EE\u8996\u78BA\u8A8D\u3057\u3066\u304F\u3060\u3055\u3044');
     })();
     function tcToFramesFromFmt(s) { var p = s.split(':'); return (parseInt(p[0], 10) * 60 + parseInt(p[1], 10)) * PLAN.fps + parseInt(p[2], 10); }

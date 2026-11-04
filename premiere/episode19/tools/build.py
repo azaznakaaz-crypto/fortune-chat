@@ -51,10 +51,12 @@ def build_doc(plan):
     op1 = frames(pp['opening1']['end'], fps) - frames(pp['opening1']['start'], fps)
     op2 = frames(pp['opening2']['end'], fps) - frames(pp['opening2']['start'], fps)
     pre = t + op1
-    op2_at = ot_end + pre
+    op2_src = frames(plan['opening2At'], fps)
+    op2_at = op2_src + pre
     shift = pre + op2
     final_end = src_end + shift
-    mp = lambda tc: (frames(tc, fps) + (pre if frames(tc, fps) < ot_end else shift))
+    main_at = ot_end + shift
+    mp = lambda tc: (frames(tc, fps) + (pre if frames(tc, fps) < op2_src else shift))
     F = lambda f: fmt(f, fps)
     L = []
     L.append('# タイムライン計画（自動生成：tools/build.py）')
@@ -70,11 +72,12 @@ def build_doc(plan):
         L.append('| %d | %s | %s | %s | %df | 現在 %s〜%s・話者%d%%・タイトル「%s」 |' % (
             i + 1, names[i], F(s), F(s + n), n, h['start'], h['end'], h['scale'], h['title'].replace('\r', ' / ')))
     L.append('| 4 | オープニング① | %s | %s | %df | 前回 %s〜%s を複製（BGMは下のベッドに統合） |' % (F(t), F(pre), op1, pp['opening1']['start'], pp['opening1']['end']))
-    L.append('| 5 | オープニングトーク | %s | %s | %df | 現在 00:00.00〜%s |' % (F(pre), F(op2_at), ot_end, plan['openingTalkEnd']))
-    L.append('| 6 | オープニング② | %s | %s | %df | 前回 %s〜%s を複製（前回のBGM込み） |' % (F(op2_at), F(op2_at + op2), op2, pp['opening2']['start'], pp['opening2']['end']))
-    L.append('| 7 | 本編 | %s | %s | %df | 現在 %s〜%s |' % (F(op2_at + op2), F(final_end), src_end - ot_end, plan['openingTalkEnd'], plan['sourceDuration']))
+    L.append('| 5 | オープニングトーク前半 | %s | %s | %df | 現在 00:00.00〜%s（〜「今日はお話ししていきたいと思います」） |' % (F(pre), F(op2_at), op2_src, plan['opening2At']))
+    L.append('| 6 | オープニング② | %s | %s | %df | 前回 %s〜%s を複製（前回のOP②専用BGM込み） |' % (F(op2_at), F(op2_at + op2), op2, pp['opening2']['start'], pp['opening2']['end']))
+    L.append('| 7 | オープニングトーク後半 | %s | %s | %df | 現在 %s〜%s（「こんにちは 意識の専門家」〜） |' % (F(op2_at + op2), F(main_at), ot_end - op2_src, plan['opening2At'], plan['openingTalkEnd']))
+    L.append('| 8 | 本編 | %s | %s | %df | 現在 %s〜%s |' % (F(main_at), F(final_end), src_end - ot_end, plan['openingTalkEnd'], plan['sourceDuration']))
     L.append('')
-    L.append('完成尺：**%s**（%d フレーム）。BGM「%s」：%s〜%s（A2）。' % (F(final_end), final_end, pp['bgmName'], F(0), F(op2_at)))
+    L.append('完成尺：**%s**（%d フレーム）。BGM「%s」（A2）：%s〜%s と %s〜%s（後半は前半の続きから）。オープニング②の間は前回のOP②専用BGM。' % (F(final_end), final_end, pp['bgmName'], F(0), F(op2_at), F(op2_at + op2), F(main_at)))
     L.append('')
     L.append('## 尺の計算根拠')
     L.append('')
@@ -86,8 +89,9 @@ def build_doc(plan):
             ('ハイライト②', hls[1][2], '現在 %s〜%s（同上）' % (hls[1][0]['start'], hls[1][0]['end'])),
             ('ハイライト③', hls[2][2], '現在 %s〜%s（同上）' % (hls[2][0]['start'], hls[2][0]['end'])),
             ('オープニング①', op1, '前回プロジェクト'),
-            ('オープニングトーク', ot_end, '現在 00:00.00〜%s' % plan['openingTalkEnd']),
+            ('オープニングトーク前半', op2_src, '現在 00:00.00〜%s' % plan['opening2At']),
             ('オープニング②', op2, '前回プロジェクト'),
+            ('オープニングトーク後半', ot_end - op2_src, '現在 %s〜%s' % (plan['opening2At'], plan['openingTalkEnd'])),
             ('本編', src_end - ot_end, '現在 %s〜%s' % (plan['openingTalkEnd'], plan['sourceDuration']))]
     for name, n, src in rows:
         L.append('| %s | %d | %.3f | %s |' % (name, n, n / fps, src))
@@ -95,7 +99,7 @@ def build_doc(plan):
     L.append('')
     L.append('検算：元のカット後動画 %d f（%s）＋ ハイライト %d f ＋ オープニング① %d f ＋ オープニング② %d f ＝ %d f。' % (src_end, plan['sourceDuration'], t, op1, op2, src_end + t + op1 + op2))
     L.append('')
-    L.append('重複の確認：オープニングトーク（0〜%d f）と本編（%d〜%d f）は境目 %s で接しており、重なりも欠けもありません。重複しているのはハイライト3本だけで、これは「本編側から削除しない」という指示どおりです（同じセリフが冒頭のハイライトと本来の位置で2回流れます）。' % (ot_end, ot_end, src_end, plan['openingTalkEnd']))
+    L.append('重複の確認：オープニングトーク前半（0〜%d f）・後半（%d〜%d f）・本編（%d〜%d f）は境目 %s と %s で接しており、重なりも欠けもありません。重複しているのはハイライト3本だけで、これは「本編側から削除しない」という指示どおりです（同じセリフが冒頭のハイライトと本来の位置で2回流れます）。' % (op2_src, op2_src, ot_end, ot_end, src_end, plan['opening2At'], plan['openingTalkEnd']))
     L.append('')
     L.append('## 強調テロップ・タイトル（V8）')
     L.append('')
