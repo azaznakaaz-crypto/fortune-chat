@@ -213,12 +213,16 @@ var PLAN = {
     var OP1_AT = HL_TOTAL;
     // \u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u2461\u306F\u3001\u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u30C8\u30FC\u30AF\u306E\u9014\u4E2D\uFF08\u73FE\u5728 PLAN.opening2At\uFF1D\u300C\u4ECA\u65E5\u306F\u304A\u8A71\u3057\u3057\u3066\u3044\u304D\u305F\u3044\u3068\u601D\u3044\u307E\u3059\u300D\u306E\u5F8C\u3001
     // \u300C\u3053\u3093\u306B\u3061\u306F \u610F\u8B58\u306E\u5C02\u9580\u5BB6\u300D\u306E\u524D\uFF09\u306B\u5165\u308C\u308B
+    // \u3055\u3089\u306B\u672C\u7DE8\u306E\u76F4\u524D\uFF08\u73FE\u5728 PLAN.openingTalkEnd\uFF09\u306B\u3082\u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u2461\u3092\u5165\u308C\u308B\uFF082\u304B\u6240\uFF09
     var OP2_SRC = tcToFrames(PLAN.opening2At);
-    var OP2_AT = OP2_SRC + PRE;
-    var MAIN_SHIFT = PRE + OP2_LEN;                 // OP2_SRC \u4EE5\u964D\uFF08\u81EA\u5DF1\u7D39\u4ECB\u301C\u672C\u7DE8\uFF09\u306E\u305A\u308C
+    var OP2_AT = OP2_SRC + PRE;                     // 1\u304B\u6240\u76EE\uFF08\u81EA\u5DF1\u7D39\u4ECB\u306E\u524D\uFF09
+    var TALK2_SHIFT = PRE + OP2_LEN;                // \u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u30C8\u30FC\u30AF\u5F8C\u534A\u306E\u305A\u308C
+    var OP2B_AT = OT_END + TALK2_SHIFT;             // 2\u304B\u6240\u76EE\uFF08\u672C\u7DE8\u306E\u524D\uFF09
+    var MAIN_SHIFT = PRE + 2 * OP2_LEN;             // \u672C\u7DE8\u306E\u305A\u308C
     var FINAL_END = SRC_END + MAIN_SHIFT;
     var MAIN_AT = OT_END + MAIN_SHIFT;              // \u672C\u7DE8\u306E\u958B\u59CB\u4F4D\u7F6E
-    function mapF(srcFrame) { return srcFrame < OP2_SRC ? srcFrame + PRE : srcFrame + MAIN_SHIFT; }
+    function shiftOf(srcFrame) { return srcFrame < OP2_SRC ? PRE : (srcFrame < OT_END ? TALK2_SHIFT : MAIN_SHIFT); }
+    function mapF(srcFrame) { return srcFrame + shiftOf(srcFrame); }
 
     // ---------------------------------------------------------------- project helpers
     function allItems(root, out) {
@@ -611,15 +615,15 @@ var PLAN = {
                 a.sort(function (x, y) { return Number(y.start.ticks) - Number(x.start.ticks); });
                 for (j = 0; j < a.length; j++) {
                     var s = framesOf(a[j].start), e = framesOf(a[j].end);
-                    if (s < OP2_SRC && e > OP2_SRC) { straddle++; }
+                    if ((s < OP2_SRC && e > OP2_SRC) || (s < OT_END && e > OT_END)) { straddle++; }
                     var off = new Time();
-                    off.ticks = String((s >= OP2_SRC ? MAIN_SHIFT : PRE) * TPF);
+                    off.ticks = String(shiftOf(s) * TPF);
                     try { a[j].move(off); moved++; } catch (eM) { log('\u79FB\u52D5\u5931\u6557 ' + a[j].name + ' @' + fmt(s) + ': ' + eM); }
                 }
             }
         }
-        log('\u65E2\u5B58\u30AF\u30EA\u30C3\u30D7\u79FB\u52D5: ' + moved + ' \u4EF6\uFF08\u301C' + PLAN.opening2At + ' \u306F +' + PRE + 'f / ' + PLAN.opening2At + '\u301C \u306F +' + MAIN_SHIFT + 'f\uFF09');
-        if (straddle) { fail('\u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u2461\u306E\u633F\u5165\u4F4D\u7F6E', straddle + ' \u500B\u306E\u30AF\u30EA\u30C3\u30D7\u304C ' + PLAN.opening2At + ' \u3092\u307E\u305F\u3044\u3067\u3044\u307E\u3059', OP2_AT, seq); }
+        log('\u65E2\u5B58\u30AF\u30EA\u30C3\u30D7\u79FB\u52D5: ' + moved + ' \u4EF6\uFF08\u301C' + PLAN.opening2At + ' \u306F +' + PRE + 'f / \u301C' + PLAN.openingTalkEnd + ' \u306F +' + TALK2_SHIFT + 'f / \u672C\u7DE8\u306F +' + MAIN_SHIFT + 'f\uFF09');
+        if (straddle) { fail('\u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u2461\u306E\u633F\u5165\u4F4D\u7F6E', straddle + ' \u500B\u306E\u30AF\u30EA\u30C3\u30D7\u304C ' + PLAN.opening2At + ' \u307E\u305F\u306F ' + PLAN.openingTalkEnd + ' \u3092\u307E\u305F\u3044\u3067\u3044\u307E\u3059', OP2_AT, seq); }
         for (k = 0; k < csvMarkers.length; k++) {
             var cm = csvMarkers[k];
             try { cm.marker.start = sec(mapF(cm.start)); cm.marker.end = sec(mapF(cm.start) + (cm.end - cm.start)); }
@@ -641,9 +645,10 @@ var PLAN = {
     var HL_ITEMS = [];
     for (i = 0; i < HL.length; i++) { HL_ITEMS.push(placeNest(HL[i].seq, HL[i].dstStart, ['\u30CF\u30A4\u30E9\u30A4\u30C8\u2460', '\u30CF\u30A4\u30E9\u30A4\u30C8\u2461', '\u30CF\u30A4\u30E9\u30A4\u30C8\u2462'][i])); }
     placeNest(OP[0], OP1_AT, '\u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u2460');
-    placeNest(OP[1], OP2_AT, '\u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u2461');
+    placeNest(OP[1], OP2_AT, '\u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u2461\uFF08\u81EA\u5DF1\u7D39\u4ECB\u306E\u524D\uFF09');
+    placeNest(OP[1], OP2B_AT, '\u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u2461\uFF08\u672C\u7DE8\u306E\u524D\uFF09');
     addMarker(seq, PRE, OP2_AT, '\u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u30C8\u30FC\u30AF\uFF08\u524D\u534A\uFF09', '\u73FE\u5728 00:00.00\u301C' + PLAN.opening2At + '\u3002\u6700\u521D\u306E\u7D043\u79D2\u306F\u30A4\u30F3\u30B5\u30FC\u30C8\u306A\u3057', 'yellow');
-    addMarker(seq, OP2_AT + OP2_LEN, MAIN_AT, '\u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u30C8\u30FC\u30AF\uFF08\u5F8C\u534A\u30FB\u81EA\u5DF1\u7D39\u4ECB\u301C\uFF09', '\u73FE\u5728 ' + PLAN.opening2At + '\u301C' + PLAN.openingTalkEnd, 'yellow');
+    addMarker(seq, OP2_AT + OP2_LEN, OP2B_AT, '\u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u30C8\u30FC\u30AF\uFF08\u5F8C\u534A\u30FB\u81EA\u5DF1\u7D39\u4ECB\u301C\uFF09', '\u73FE\u5728 ' + PLAN.opening2At + '\u301C' + PLAN.openingTalkEnd, 'yellow');
     addMarker(seq, MAIN_AT, FINAL_END, '\u672C\u7DE8', '\u73FE\u5728 ' + PLAN.openingTalkEnd + '\u301C' + PLAN.sourceDuration, 'yellow');
 
     // short fades between highlights (opacity + audio level, no SE)
@@ -997,7 +1002,7 @@ var PLAN = {
         // order / length
         QC.push('\u60F3\u5B9A\u5168\u9577: ' + fmt(FINAL_END) + ' / \u5B9F\u969B: ' + fmt(framesOf(seq.end)));
         QC.push('\u69CB\u6210: HL\u2460 00:00:00 \u2192 HL\u2461 ' + fmt(HL[1].dstStart) + ' \u2192 HL\u2462 ' + fmt(HL[2].dstStart) + ' \u2192 OP\u2460 ' + fmt(OP1_AT) +
-            ' \u2192 \u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u30C8\u30FC\u30AF\u524D\u534A ' + fmt(PRE) + ' \u2192 OP\u2461 ' + fmt(OP2_AT) + ' \u2192 \u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u30C8\u30FC\u30AF\u5F8C\u534A ' + fmt(OP2_AT + OP2_LEN) + ' \u2192 \u672C\u7DE8 ' + fmt(MAIN_AT));
+            ' \u2192 \u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u30C8\u30FC\u30AF\u524D\u534A ' + fmt(PRE) + ' \u2192 OP\u2461 ' + fmt(OP2_AT) + ' \u2192 \u30AA\u30FC\u30D7\u30CB\u30F3\u30B0\u30C8\u30FC\u30AF\u5F8C\u534A ' + fmt(OP2_AT + OP2_LEN) + ' \u2192 OP\u2461 ' + fmt(OP2B_AT) + ' \u2192 \u672C\u7DE8 ' + fmt(MAIN_AT));
         QC.push('\u30C6\u30ED\u30C3\u30D7\u306E\u306F\u307F\u51FA\u3057\u30FB\u30A4\u30F3\u30B5\u30FC\u30C8\u306E\u6587\u982D/\u6587\u672B\u30FB\u97F3\u306E\u5207\u308C: \u81EA\u52D5\u5224\u5B9A\u3067\u304D\u306A\u3044\u305F\u3081\u3001\u78BA\u8A8D\u7528MP4\u3067\u76EE\u8996\u78BA\u8A8D\u3057\u3066\u304F\u3060\u3055\u3044');
     })();
     function tcToFramesFromFmt(s) { var p = s.split(':'); return (parseInt(p[0], 10) * 60 + parseInt(p[1], 10)) * PLAN.fps + parseInt(p[2], 10); }

@@ -53,10 +53,14 @@ def build_doc(plan):
     pre = t + op1
     op2_src = frames(plan['opening2At'], fps)
     op2_at = op2_src + pre
-    shift = pre + op2
+    talk2 = pre + op2
+    shift = pre + 2 * op2
     final_end = src_end + shift
+    op2b_at = ot_end + talk2
     main_at = ot_end + shift
-    mp = lambda tc: (frames(tc, fps) + (pre if frames(tc, fps) < op2_src else shift))
+    def mp(tc):
+        f = frames(tc, fps)
+        return f + (pre if f < op2_src else talk2 if f < ot_end else shift)
     F = lambda f: fmt(f, fps)
     L = []
     L.append('# タイムライン計画（自動生成：tools/build.py）')
@@ -74,14 +78,15 @@ def build_doc(plan):
     L.append('| 4 | オープニング① | %s | %s | %df | 前回 %s〜%s を複製（BGMは下のベッドに統合） |' % (F(t), F(pre), op1, pp['opening1']['start'], pp['opening1']['end']))
     L.append('| 5 | オープニングトーク前半 | %s | %s | %df | 現在 00:00.00〜%s（〜「今日はお話ししていきたいと思います」） |' % (F(pre), F(op2_at), op2_src, plan['opening2At']))
     L.append('| 6 | オープニング② | %s | %s | %df | 前回 %s〜%s を複製（前回のOP②専用BGM込み） |' % (F(op2_at), F(op2_at + op2), op2, pp['opening2']['start'], pp['opening2']['end']))
-    L.append('| 7 | オープニングトーク後半 | %s | %s | %df | 現在 %s〜%s（「こんにちは 意識の専門家」〜） |' % (F(op2_at + op2), F(main_at), ot_end - op2_src, plan['opening2At'], plan['openingTalkEnd']))
-    L.append('| 8 | 本編 | %s | %s | %df | 現在 %s〜%s |' % (F(main_at), F(final_end), src_end - ot_end, plan['openingTalkEnd'], plan['sourceDuration']))
+    L.append('| 7 | オープニングトーク後半 | %s | %s | %df | 現在 %s〜%s（「こんにちは 意識の専門家」〜「最後までご覧ください」） |' % (F(op2_at + op2), F(op2b_at), ot_end - op2_src, plan['opening2At'], plan['openingTalkEnd']))
+    L.append('| 8 | オープニング②（2回目） | %s | %s | %df | 同じOP②をもう一度（前回のOP②専用BGM込み） |' % (F(op2b_at), F(main_at), op2))
+    L.append('| 9 | 本編 | %s | %s | %df | 現在 %s〜%s |' % (F(main_at), F(final_end), src_end - ot_end, plan['openingTalkEnd'], plan['sourceDuration']))
     L.append('')
     L.append('完成尺：**%s**（%d フレーム）。BGM「%s」（A2）：%s〜%s のみ。オープニング②の間は前回のOP②専用BGM。「こんにちは 意識の専門家」（%s）以降はBGMなし。' % (F(final_end), final_end, pp['bgmName'], F(0), F(op2_at), F(op2_at + op2)))
     L.append('')
     L.append('## 尺の計算根拠')
     L.append('')
-    L.append('表記の注意：「06:45:11」は **分:秒:フレーム**（6分45秒＋11フレーム＝6分45.37秒）です。「06:17.60」のような小数の秒ではありません。')
+    L.append('表記の注意：「%s」は **分:秒:フレーム**（%d分%d秒＋%dフレーム＝%d分%.2f秒）です。「06:17.60」のような小数の秒ではありません。' % (F(final_end), final_end // fps // 60, final_end // fps % 60, final_end % fps, final_end // fps // 60, final_end / fps % 60))
     L.append('')
     L.append('| 項目 | フレーム | 秒 | 出どころ |')
     L.append('|---|---:|---:|---|')
@@ -92,14 +97,15 @@ def build_doc(plan):
             ('オープニングトーク前半', op2_src, '現在 00:00.00〜%s' % plan['opening2At']),
             ('オープニング②', op2, '前回プロジェクト'),
             ('オープニングトーク後半', ot_end - op2_src, '現在 %s〜%s' % (plan['opening2At'], plan['openingTalkEnd'])),
+            ('オープニング②（2回目）', op2, '前回プロジェクト（同じものを2か所）'),
             ('本編', src_end - ot_end, '現在 %s〜%s' % (plan['openingTalkEnd'], plan['sourceDuration']))]
     for name, n, src in rows:
         L.append('| %s | %d | %.3f | %s |' % (name, n, n / fps, src))
     L.append('| **合計** | **%d** | **%.3f** | = %d分%06.3f秒 |' % (final_end, final_end / fps, final_end // fps // 60, final_end / fps % 60))
     L.append('')
-    L.append('検算：元のカット後動画 %d f（%s）＋ ハイライト %d f ＋ オープニング① %d f ＋ オープニング② %d f ＝ %d f。' % (src_end, plan['sourceDuration'], t, op1, op2, src_end + t + op1 + op2))
+    L.append('検算：元のカット後動画 %d f（%s）＋ ハイライト %d f ＋ オープニング① %d f ＋ オープニング② %d f × 2 ＝ %d f。' % (src_end, plan['sourceDuration'], t, op1, op2, src_end + t + op1 + 2 * op2))
     L.append('')
-    L.append('重複の確認：オープニングトーク前半（0〜%d f）・後半（%d〜%d f）・本編（%d〜%d f）は境目 %s と %s で接しており、重なりも欠けもありません。重複しているのはハイライト3本だけで、これは「本編側から削除しない」という指示どおりです（同じセリフが冒頭のハイライトと本来の位置で2回流れます）。' % (op2_src, op2_src, ot_end, ot_end, src_end, plan['opening2At'], plan['openingTalkEnd']))
+    L.append('重複の確認：オープニングトーク前半（0〜%d f）・後半（%d〜%d f）・本編（%d〜%d f）は境目 %s と %s で接しており、重なりも欠けもありません。意図的な重複は、ハイライト3本（「本編側から削除しない」指示どおり、同じセリフが冒頭と本来の位置で2回流れる）と、オープニング②の2回使用（ご指示どおり）です。' % (op2_src, op2_src, ot_end, ot_end, src_end, plan['opening2At'], plan['openingTalkEnd']))
     L.append('')
     L.append('## 強調テロップ・タイトル（V8）')
     L.append('')
