@@ -174,7 +174,10 @@ class Sequence {
   importMGT(p, ticks, v) {
     if (!fs.existsSync(p)) throw new Error('mogrt missing');
     const s = Number(ticks);
-    const prop = new Prop('テキスト', JSON.stringify({ textEditValue: 'TEMPLATE', fontEditValue: ['YuMin-Medium'] }));
+    const MGT = process.argv.find((x) => x.startsWith('--mgt=')) || '--mgt=json';
+    const prop = MGT === '--mgt=plain' ? new Prop('セレン愛が紐解く', 'セレン愛が紐解く\r「覚醒」の本質')
+      : new Prop('テキスト', JSON.stringify({ textEditValue: 'TEMPLATE', fontEditValue: ['YuMin-Medium'] }));
+    if (MGT === '--mgt=readonly') prop.setValue = () => 0;
     const it = new TrackItem(this.videoTracks[v], s, s + 5 * TPS, { name: path.basename(p), components: videoComponents('mogrt'), mgt: comp('グラフィックのパラメーター', 'mgt', [prop]) });
     this.videoTracks[v]._overwrite(it); return it;
   }
@@ -323,7 +326,7 @@ console.log('alerts:', alerts.map((a) => a.split('\n')[0]));
 if (!seq) { console.log('NO SEQUENCE'); process.exit(1); }
 console.log('original untouched:', curSeq.name, curSeq.videoTracks[0].items.length, curSeq.markerList.length === 0 && curSeq.videoTracks[0].items[0]._s === 0);
 seq.videoTracks.forEach((t, k) => {
-  const c = t.clips; const head = c.slice(0, 8).map((i) => `${F(i._s)}-${F(i._e)} ${i.name}` + (i.mgt ? ` [${JSON.parse(i.mgt.properties[0].value).textEditValue.replace(/\r/g, '/')}]` : '') + (i.components[1].properties[1].value !== 100 ? ` scale=${i.components[1].properties[1].value}` : ''));
+  const c = t.clips; const head = c.slice(0, 8).map((i) => `${F(i._s)}-${F(i._e)} ${i.name}` + (i.mgt ? ` [${(String(i.mgt.properties[0].value).charAt(0) === '{' ? JSON.parse(i.mgt.properties[0].value).textEditValue : i.mgt.properties[0].value).replace(/\r/g, '/')}]` : '') + (i.components[1].properties[1].value !== 100 ? ` scale=${i.components[1].properties[1].value}` : ''));
   console.log(`V${k + 1} (${c.length})`); head.forEach((h) => console.log('   ', h));
 });
 seq.audioTracks.forEach((t, k) => { const c = t.clips; console.log(`A${k + 1} (${c.length})`, c.slice(0, 5).map((i) => `${F(i._s)}-${F(i._e)} ${i.name}`).join(' | ')); });

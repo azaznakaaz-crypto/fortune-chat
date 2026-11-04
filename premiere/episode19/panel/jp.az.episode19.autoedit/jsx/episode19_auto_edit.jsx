@@ -798,20 +798,73 @@ var PLAN = {
 
     // ---------------------------------------------------------------- 13. \u30C6\u30AD\u30B9\u30C8\uFF08\u524D\u56DE\u30C7\u30B6\u30A4\u30F3\u306EMOGRT\u3002\u30DD\u30A4\u30F3\u30C8\u30C6\u30AD\u30B9\u30C8\u306E\u307E\u307E\u7DE8\u96C6\u53EF\u80FD\uFF09
     $.global.EP19_STEP = '13. \u30C6\u30AD\u30B9\u30C8\uFF08\u524D\u56DE\u30C7\u30B6\u30A4\u30F3\u306EMOGRT\u3002\u30DD\u30A4\u30F3\u30C8\u30C6\u30AD\u30B9\u30C8\u306E\u307E\u307E\u7DE8\u96C6\u53EF\u80FD\uFF09';
-    function setMogrtText(ti, text) {
-        var mgt = null;
-        try { mgt = ti.getMGTComponent(); } catch (e) { }
-        if (!mgt) { return false; }
-        for (var k = 0; k < mgt.properties.numItems; k++) {
-            var p = mgt.properties[k], v = null;
-            try { v = p.getValue(); } catch (e2) { continue; }
-            if (typeof v === 'string' && v.indexOf('textEditValue') >= 0) {
-                var o = parseJSON(v);
-                o.textEditValue = text;
-                p.setValue(toJSON(o), true);
-                return true;
+    // MOGRT \u306E\u6587\u5B57\u5DEE\u3057\u66FF\u3048\u3002Premiere \u306E\u7248\u306B\u3088\u3063\u3066\u5024\u306E\u5F62\u304C\u9055\u3046\u305F\u3081\u3001\u3044\u304F\u3064\u304B\u306E\u5F62\u3092\u9806\u306B\u8A66\u3057\u3001\u5FC5\u305A\u8AAD\u307F\u76F4\u3057\u3066\u78BA\u8A8D\u3059\u308B\u3002
+    var MGT_DIAG_DONE = false;
+    function valueText(v) {   // \u5024\u304B\u3089\u73FE\u5728\u306E\u6587\u5B57\u5217\u3092\u53D6\u308A\u51FA\u3059\uFF08\u6BD4\u8F03\u7528\uFF09
+        if (typeof v === 'string') {
+            if (v.charAt(0) === '{') { try { var o = parseJSON(v); if (o && o.textEditValue !== undefined) { return String(o.textEditValue); } } catch (e) { } }
+            return v;
+        }
+        if (v && typeof v === 'object' && v.textEditValue !== undefined) { return String(v.textEditValue); }
+        return null;
+    }
+    function sameText(a, b) { return a !== null && String(a).replace(/\r\n|\n/g, '\r') === String(b).replace(/\r\n|\n/g, '\r'); }
+    function tryProp(p, text) {
+        var v = null;
+        try { v = p.getValue(); } catch (e) { return false; }
+        var cands = [];
+        if (typeof v === 'string' && v.indexOf('textEditValue') >= 0) {
+            try { var o = parseJSON(v); o.textEditValue = text; cands.push(toJSON(o)); } catch (e1) { }
+        } else if (v && typeof v === 'object' && v.textEditValue !== undefined) {
+            v.textEditValue = text; cands.push(toJSON(v)); cands.push(v);
+        } else if (typeof v === 'string' && /\u30C6\u30AD\u30B9\u30C8|Text|text/.test(String(p.displayName) + '') ) {
+            cands.push(text);
+        } else if (typeof v === 'string' && v.length > 0 && v.length < 200 && /[\u3040-\u30FF\u4E00-\u9FFF]/.test(v)) {
+            cands.push(text);   // \u65E5\u672C\u8A9E\u306E\u6587\u5B57\u5217\u305D\u306E\u3082\u306E\uFF08\u30C6\u30F3\u30D7\u30EC\u30FC\u30C8\u306E\u5143\u306E\u6587\u8A00\uFF09
+        }
+        for (var c = 0; c < cands.length; c++) {
+            try { p.setValue(cands[c], true); } catch (e2) { continue; }
+            var after = null;
+            try { after = p.getValue(); } catch (e3) { }
+            if (sameText(valueText(after), text)) { return true; }
+        }
+        return false;
+    }
+    function dumpMgt(ti) {
+        if (MGT_DIAG_DONE) { return; }
+        MGT_DIAG_DONE = true;
+        var out = ['MOGRT\u8A3A\u65AD\uFF08' + ti.name + '\uFF09'], k, j, mgt = null;
+        try { mgt = ti.getMGTComponent(); } catch (e) { out.push('getMGTComponent \u30A8\u30E9\u30FC: ' + e); }
+        function dumpProps(label, comp) {
+            for (j = 0; j < comp.properties.numItems; j++) {
+                var p = comp.properties[j], v, t;
+                try { v = p.getValue(); t = typeof v; } catch (e2) { v = 'ERR ' + e2; t = 'error'; }
+                var shown = (t === 'object' && v !== null) ? toJSON(v) : String(v);
+                out.push('  [' + label + '] ' + p.displayName + ' : ' + t + ' : ' + shown.substr(0, 300));
             }
         }
+        if (mgt) { out.push('MGT: ' + mgt.displayName + '\uFF08' + mgt.properties.numItems + '\u9805\u76EE\uFF09'); dumpProps('MGT', mgt); }
+        else { out.push('MGT: \u306A\u3057'); }
+        for (k = 0; k < ti.components.numItems; k++) {
+            var c = ti.components[k];
+            out.push('\u30B3\u30F3\u30DD\u30FC\u30CD\u30F3\u30C8: ' + c.displayName + ' / ' + c.matchName);
+            if (!/Motion|Opacity/.test(c.matchName)) { dumpProps(c.displayName, c); }
+        }
+        for (k = 0; k < out.length; k++) { log(out[k]); }
+    }
+    function setMogrtText(ti, text) {
+        var mgt = null, k, c;
+        try { mgt = ti.getMGTComponent(); } catch (e) { }
+        if (mgt) { for (k = 0; k < mgt.properties.numItems; k++) { if (tryProp(mgt.properties[k], text)) { return true; } } }
+        for (c = 0; c < ti.components.numItems; c++) {   // \u4E88\u5099\uFF1A\u901A\u5E38\u306E\u30B3\u30F3\u30DD\u30FC\u30CD\u30F3\u30C8\u5074\u306E\u30C6\u30AD\u30B9\u30C8\u9805\u76EE
+            var comp = ti.components[c];
+            if (/Motion|Opacity/.test(comp.matchName)) { continue; }
+            for (k = 0; k < comp.properties.numItems; k++) {
+                var p = comp.properties[k];
+                if (/\u30BD\u30FC\u30B9\u30C6\u30AD\u30B9\u30C8|Source Text|\u30C6\u30AD\u30B9\u30C8|Text/.test(String(p.displayName)) && tryProp(p, text)) { return true; }
+            }
+        }
+        dumpMgt(ti);
         return false;
     }
     // ---- \u65B9\u5F0FB: MOGRT\u304C\u7121\u3044\u3068\u304D\u3001\u524D\u56DE\u30D7\u30ED\u30B8\u30A7\u30AF\u30C8\u306E\u30BF\u30A4\u30C8\u30EB\uFF08\u30DD\u30A4\u30F3\u30C8\u30C6\u30AD\u30B9\u30C8\uFF09\u3092\u305D\u306E\u307E\u307E\u8907\u88FD\u3057\u3001\u6587\u5B57\u3060\u3051\u5DEE\u3057\u66FF\u3048\u308B

@@ -680,20 +680,73 @@
 
     // ---------------------------------------------------------------- 13. テキスト（前回デザインのMOGRT。ポイントテキストのまま編集可能）
     $.global.EP19_STEP = '13. テキスト（前回デザインのMOGRT。ポイントテキストのまま編集可能）';
-    function setMogrtText(ti, text) {
-        var mgt = null;
-        try { mgt = ti.getMGTComponent(); } catch (e) { }
-        if (!mgt) { return false; }
-        for (var k = 0; k < mgt.properties.numItems; k++) {
-            var p = mgt.properties[k], v = null;
-            try { v = p.getValue(); } catch (e2) { continue; }
-            if (typeof v === 'string' && v.indexOf('textEditValue') >= 0) {
-                var o = parseJSON(v);
-                o.textEditValue = text;
-                p.setValue(toJSON(o), true);
-                return true;
+    // MOGRT の文字差し替え。Premiere の版によって値の形が違うため、いくつかの形を順に試し、必ず読み直して確認する。
+    var MGT_DIAG_DONE = false;
+    function valueText(v) {   // 値から現在の文字列を取り出す（比較用）
+        if (typeof v === 'string') {
+            if (v.charAt(0) === '{') { try { var o = parseJSON(v); if (o && o.textEditValue !== undefined) { return String(o.textEditValue); } } catch (e) { } }
+            return v;
+        }
+        if (v && typeof v === 'object' && v.textEditValue !== undefined) { return String(v.textEditValue); }
+        return null;
+    }
+    function sameText(a, b) { return a !== null && String(a).replace(/\r\n|\n/g, '\r') === String(b).replace(/\r\n|\n/g, '\r'); }
+    function tryProp(p, text) {
+        var v = null;
+        try { v = p.getValue(); } catch (e) { return false; }
+        var cands = [];
+        if (typeof v === 'string' && v.indexOf('textEditValue') >= 0) {
+            try { var o = parseJSON(v); o.textEditValue = text; cands.push(toJSON(o)); } catch (e1) { }
+        } else if (v && typeof v === 'object' && v.textEditValue !== undefined) {
+            v.textEditValue = text; cands.push(toJSON(v)); cands.push(v);
+        } else if (typeof v === 'string' && /テキスト|Text|text/.test(String(p.displayName) + '') ) {
+            cands.push(text);
+        } else if (typeof v === 'string' && v.length > 0 && v.length < 200 && /[぀-ヿ一-鿿]/.test(v)) {
+            cands.push(text);   // 日本語の文字列そのもの（テンプレートの元の文言）
+        }
+        for (var c = 0; c < cands.length; c++) {
+            try { p.setValue(cands[c], true); } catch (e2) { continue; }
+            var after = null;
+            try { after = p.getValue(); } catch (e3) { }
+            if (sameText(valueText(after), text)) { return true; }
+        }
+        return false;
+    }
+    function dumpMgt(ti) {
+        if (MGT_DIAG_DONE) { return; }
+        MGT_DIAG_DONE = true;
+        var out = ['MOGRT診断（' + ti.name + '）'], k, j, mgt = null;
+        try { mgt = ti.getMGTComponent(); } catch (e) { out.push('getMGTComponent エラー: ' + e); }
+        function dumpProps(label, comp) {
+            for (j = 0; j < comp.properties.numItems; j++) {
+                var p = comp.properties[j], v, t;
+                try { v = p.getValue(); t = typeof v; } catch (e2) { v = 'ERR ' + e2; t = 'error'; }
+                var shown = (t === 'object' && v !== null) ? toJSON(v) : String(v);
+                out.push('  [' + label + '] ' + p.displayName + ' : ' + t + ' : ' + shown.substr(0, 300));
             }
         }
+        if (mgt) { out.push('MGT: ' + mgt.displayName + '（' + mgt.properties.numItems + '項目）'); dumpProps('MGT', mgt); }
+        else { out.push('MGT: なし'); }
+        for (k = 0; k < ti.components.numItems; k++) {
+            var c = ti.components[k];
+            out.push('コンポーネント: ' + c.displayName + ' / ' + c.matchName);
+            if (!/Motion|Opacity/.test(c.matchName)) { dumpProps(c.displayName, c); }
+        }
+        for (k = 0; k < out.length; k++) { log(out[k]); }
+    }
+    function setMogrtText(ti, text) {
+        var mgt = null, k, c;
+        try { mgt = ti.getMGTComponent(); } catch (e) { }
+        if (mgt) { for (k = 0; k < mgt.properties.numItems; k++) { if (tryProp(mgt.properties[k], text)) { return true; } } }
+        for (c = 0; c < ti.components.numItems; c++) {   // 予備：通常のコンポーネント側のテキスト項目
+            var comp = ti.components[c];
+            if (/Motion|Opacity/.test(comp.matchName)) { continue; }
+            for (k = 0; k < comp.properties.numItems; k++) {
+                var p = comp.properties[k];
+                if (/ソーステキスト|Source Text|テキスト|Text/.test(String(p.displayName)) && tryProp(p, text)) { return true; }
+            }
+        }
+        dumpMgt(ti);
         return false;
     }
     // ---- 方式B: MOGRTが無いとき、前回プロジェクトのタイトル（ポイントテキスト）をそのまま複製し、文字だけ差し替える
