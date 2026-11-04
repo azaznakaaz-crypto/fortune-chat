@@ -16,6 +16,7 @@
 //@@PLAN@@
 
 (function () {
+    var SCRIPT_VERSION = 'v1.4';   // パネル・インストーラーの表示と合わせる
     var TPS = 254016000000;          // Premiere ticks / sec
     var TPF = TPS / PLAN.fps;        // ticks / frame（30fps → 8467200000）
 
@@ -353,7 +354,7 @@
     check(!new File(newProjPath).exists, true, '作業用プロジェクト「' + new File(newProjPath).displayName + '」がまだ無い');
 
     if (MODE === 'check') {
-        finish('【確認のみ・何も変更していません】\n\n' + checkText() + '\n\n' +
+        finish('【確認のみ・何も変更していません】（スクリプト ' + SCRIPT_VERSION + '）\n\n' + checkText() + '\n\n' +
             (blocked() ? '× の項目を直してから、もう一度「確認」を押してください。' : 'すべて準備OKです。「実行」を押せます。'));
         return;
     }
@@ -1009,7 +1010,7 @@
 
     (function () {
         var k, out = [];
-        out.push('# 19_ディセンション恐れすぎ問題 自動編集レポート');
+        out.push('# 19_ディセンション恐れすぎ問題 自動編集レポート（スクリプト ' + SCRIPT_VERSION + '）');
         out.push('');
         out.push('- 作業用プロジェクト: ' + newProjPath);
         out.push('- 元プロジェクト（未変更）: ' + projFile.fsName);

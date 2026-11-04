@@ -134,6 +134,7 @@ var PLAN = {
 };
 
 (function () {
+    var SCRIPT_VERSION = 'v1.4';   // \u30D1\u30CD\u30EB\u30FB\u30A4\u30F3\u30B9\u30C8\u30FC\u30E9\u30FC\u306E\u8868\u793A\u3068\u5408\u308F\u305B\u308B
     var TPS = 254016000000;          // Premiere ticks / sec
     var TPF = TPS / PLAN.fps;        // ticks / frame\uFF0830fps \u2192 8467200000\uFF09
 
@@ -471,7 +472,7 @@ var PLAN = {
     check(!new File(newProjPath).exists, true, '\u4F5C\u696D\u7528\u30D7\u30ED\u30B8\u30A7\u30AF\u30C8\u300C' + new File(newProjPath).displayName + '\u300D\u304C\u307E\u3060\u7121\u3044');
 
     if (MODE === 'check') {
-        finish('\u3010\u78BA\u8A8D\u306E\u307F\u30FB\u4F55\u3082\u5909\u66F4\u3057\u3066\u3044\u307E\u305B\u3093\u3011\n\n' + checkText() + '\n\n' +
+        finish('\u3010\u78BA\u8A8D\u306E\u307F\u30FB\u4F55\u3082\u5909\u66F4\u3057\u3066\u3044\u307E\u305B\u3093\u3011\uFF08\u30B9\u30AF\u30EA\u30D7\u30C8 ' + SCRIPT_VERSION + '\uFF09\n\n' + checkText() + '\n\n' +
             (blocked() ? '\u00D7 \u306E\u9805\u76EE\u3092\u76F4\u3057\u3066\u304B\u3089\u3001\u3082\u3046\u4E00\u5EA6\u300C\u78BA\u8A8D\u300D\u3092\u62BC\u3057\u3066\u304F\u3060\u3055\u3044\u3002' : '\u3059\u3079\u3066\u6E96\u5099OK\u3067\u3059\u3002\u300C\u5B9F\u884C\u300D\u3092\u62BC\u305B\u307E\u3059\u3002'));
         return;
     }
@@ -1127,7 +1128,7 @@ var PLAN = {
 
     (function () {
         var k, out = [];
-        out.push('# 19_\u30C7\u30A3\u30BB\u30F3\u30B7\u30E7\u30F3\u6050\u308C\u3059\u304E\u554F\u984C \u81EA\u52D5\u7DE8\u96C6\u30EC\u30DD\u30FC\u30C8');
+        out.push('# 19_\u30C7\u30A3\u30BB\u30F3\u30B7\u30E7\u30F3\u6050\u308C\u3059\u304E\u554F\u984C \u81EA\u52D5\u7DE8\u96C6\u30EC\u30DD\u30FC\u30C8\uFF08\u30B9\u30AF\u30EA\u30D7\u30C8 ' + SCRIPT_VERSION + '\uFF09');
         out.push('');
         out.push('- \u4F5C\u696D\u7528\u30D7\u30ED\u30B8\u30A7\u30AF\u30C8: ' + newProjPath);
         out.push('- \u5143\u30D7\u30ED\u30B8\u30A7\u30AF\u30C8\uFF08\u672A\u5909\u66F4\uFF09: ' + projFile.fsName);
