@@ -305,7 +305,7 @@ const ctx = {
   app: { project, enableQE() { if (NO_QE) throw new Error('no qe'); }, encoder: { ENCODE_ENTIRE: 0 } },
   qe: NO_QE ? undefined : qe,
   Time, ProjectItemType, File: fnFile, Folder: fnFolder,
-  alert: (m) => alerts.push(m), confirm: () => true,
+  alert: (m) => alerts.push(m), confirm: () => { throw new Error('Not Enough Parameters'); }, EP19_CONFIRMED: true,
   $: { writeln: () => {}, global: {} },
   EP19_MODE: MODE,
 };

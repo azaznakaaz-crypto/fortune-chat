@@ -385,6 +385,7 @@ var PLAN = {
     }
 
     // ---------------------------------------------------------------- 0. preflight
+    $.global.EP19_STEP = '0. preflight';
     // EP19_MODE: 'check' = \u4F55\u3082\u5909\u66F4\u305B\u305A\u306B\u6E96\u5099\u72B6\u6CC1\u3060\u3051\u8868\u793A / 'run' = \u5B9F\u884C\uFF08\u30D1\u30CD\u30EB\u306E\u30DC\u30BF\u30F3\u304C\u8A2D\u5B9A\uFF09
     var MODE = (typeof EP19_MODE !== 'undefined' && EP19_MODE === 'check') ? 'check' : 'run';
     var CHECKS = [];      // [ok(bool), blocking(bool), text]
@@ -444,16 +445,21 @@ var PLAN = {
     }
     if (blocked()) { finish('\u6E96\u5099\u304C\u8DB3\u308A\u306A\u3044\u305F\u3081\u4E2D\u6B62\u3057\u307E\u3057\u305F\uFF08\u4F55\u3082\u5909\u66F4\u3057\u3066\u3044\u307E\u305B\u3093\uFF09\u3002\n\n' + checkText()); return; }
 
-    if (!confirm('\u78BA\u8A8D\u7528\u30D7\u30ED\u30B8\u30A7\u30AF\u30C8\u3067\u81EA\u52D5\u7DE8\u96C6\u3092\u5B9F\u884C\u3057\u307E\u3059\u3002\n\n' +
-        '\u30FB\u958B\u3044\u3066\u3044\u308B\u300C' + projName + '\u300D\u3092\u300C' + new File(newProjPath).displayName + '\u300D\u3068\u3057\u3066\u5225\u540D\u4FDD\u5B58\u3057\u3066\u304B\u3089\u4F5C\u696D\u3057\u307E\u3059\n' +
-        '\u30FB\u5143\u306E .prproj\uFF0F\u5143\u30B7\u30FC\u30B1\u30F3\u30B9\uFF0F\u57FA\u672C\u30C6\u30ED\u30C3\u30D7\u306F\u5909\u66F4\u3057\u307E\u305B\u3093\n\n\u5B9F\u884C\u3057\u307E\u3059\u304B\uFF1F')) { return; }
+    // \u5B9F\u884C\u306E\u6700\u7D42\u78BA\u8A8D\u306F\u30D1\u30CD\u30EB\u5074\u3067\u884C\u3046\uFF08\u30DC\u30BF\u30F3\u30922\u56DE\u62BC\u3059\uFF09\u3002Premiere \u306E confirm() \u306F\u7248\u306B\u3088\u3063\u3066\u5F15\u6570\u30A8\u30E9\u30FC\u306B\u306A\u308B\u305F\u3081\u4F7F\u308F\u306A\u3044
+    if (typeof EP19_CONFIRMED === 'undefined' || EP19_CONFIRMED !== true) {
+        var ok = false;
+        try { ok = confirm('\u78BA\u8A8D\u7528\u30D7\u30ED\u30B8\u30A7\u30AF\u30C8\u300C' + projName + '\u300D\u3067\u81EA\u52D5\u7DE8\u96C6\u3092\u5B9F\u884C\u3057\u307E\u3059\u304B\uFF1F', false, '19 \u81EA\u52D5\u7DE8\u96C6'); } catch (eCf) { ok = false; }
+        if (!ok) { finish('\u5B9F\u884C\u3092\u53D6\u308A\u6D88\u3057\u307E\u3057\u305F\uFF08\u4F55\u3082\u5909\u66F4\u3057\u3066\u3044\u307E\u305B\u3093\uFF09\u3002'); return; }
+    }
 
     // ---------------------------------------------------------------- 1. save as (keep original project untouched)
+    $.global.EP19_STEP = '1. save as (keep original project untouched)';
     app.project.saveAs(newProjPath);
     log('\u4F5C\u696D\u7528\u30D7\u30ED\u30B8\u30A7\u30AF\u30C8\u3068\u3057\u3066\u4FDD\u5B58: ' + newProjPath);
     srcSeq = findSeqByName(PLAN.sourceSequenceName)[0];
 
     // ---------------------------------------------------------------- 2. clone source sequence
+    $.global.EP19_STEP = '2. clone source sequence';
     var before = seqIds();
     srcSeq.clone();
     var created = newSeqSince(before);
@@ -475,6 +481,7 @@ var PLAN = {
     }
 
     // ---------------------------------------------------------------- 3. CSV markers (before inserting highlights/openings)
+    $.global.EP19_STEP = '3. CSV markers (before inserting highlights/openings)';
     var csvMarkers = [];
     (function () {
         var csv = null, files = assetDir.getFiles('*.csv'), k;
@@ -496,6 +503,7 @@ var PLAN = {
     })();
 
     // ---------------------------------------------------------------- 5. highlight subsequences (from the clone, before shifting)
+    $.global.EP19_STEP = '5. highlight subsequences (from the clone, before shifting)';
     var seqBin = getBin('19_\u81EA\u52D5\u7DE8\u96C6\u6848_\u30CD\u30B9\u30C8');
     function makeSubsequence(fromSeq, startFrame, endFrame, name) {
         var b = seqIds();
@@ -529,6 +537,7 @@ var PLAN = {
     }
 
     // ---------------------------------------------------------------- 6. previous project \u2192 opening \u2460\u2461 (copies only)
+    $.global.EP19_STEP = '6. previous project \u2192 opening \u2460\u2461 (copies only)';
     var prevSeq = null;
     (function () {
         var b = seqIds(), ok = false;
@@ -584,6 +593,7 @@ var PLAN = {
     }
 
     // ---------------------------------------------------------------- 8. make room: shift original clips & markers
+    $.global.EP19_STEP = '8. make room: shift original clips & markers';
     (function () {
         var groups = [seq.videoTracks, seq.audioTracks], g, k, j, moved = 0, straddle = 0;
         for (g = 0; g < groups.length; g++) {
@@ -609,6 +619,7 @@ var PLAN = {
     })();
 
     // ---------------------------------------------------------------- 9. place highlights and openings on V1
+    $.global.EP19_STEP = '9. place highlights and openings on V1';
     function placeNest(nestSeq, atFrame, label) {
         if (!nestSeq) { return null; }
         try { seq.videoTracks[0].overwriteClip(nestSeq.projectItem, sec(atFrame)); } catch (e) { }
@@ -654,6 +665,7 @@ var PLAN = {
     })();
 
     // ---------------------------------------------------------------- 10. BGM bed (highlights \u2192 end of opening talk)
+    $.global.EP19_STEP = '10. BGM bed (highlights \u2192 end of opening talk)';
     (function () {
         var aIdx = PLAN.tracks.bgmAudio;
         if (!BGM) { fail('BGM\uFF08' + PLAN.previousProject.bgmName + '\uFF09', '\u524D\u56DE\u30D7\u30ED\u30B8\u30A7\u30AF\u30C8\u304B\u3089BGM\u30AF\u30EA\u30C3\u30D7\u3092\u53D6\u5F97\u3067\u304D\u307E\u305B\u3093\u3067\u3057\u305F', 0, seq); return; }
@@ -678,6 +690,7 @@ var PLAN = {
     })();
 
     // ---------------------------------------------------------------- 11. \u753B\u89D2\uFF08\u30AB\u30C3\u30C8\u70B9\u306E\u307F\u30FB\u9014\u4E2D\u30BA\u30FC\u30E0\u306A\u3057\uFF09
+    $.global.EP19_STEP = '11. \u753B\u89D2\uFF08\u30AB\u30C3\u30C8\u70B9\u306E\u307F\u30FB\u9014\u4E2D\u30BA\u30FC\u30E0\u306A\u3057\uFF09';
     (function () {
         var k, j;
         for (k = 0; k < PLAN.zoom.length; k++) {
@@ -701,6 +714,7 @@ var PLAN = {
     })();
 
     // ---------------------------------------------------------------- 12. \u5199\u771F\u30A4\u30F3\u30B5\u30FC\u30C8\uFF08episode19_assets \u306E01\u301C06\u3092\u76F4\u63A5\u53C2\u7167\uFF09
+    $.global.EP19_STEP = '12. \u5199\u771F\u30A4\u30F3\u30B5\u30FC\u30C8\uFF08episode19_assets \u306E01\u301C06\u3092\u76F4\u63A5\u53C2\u7167\uFF09';
     (function () {
         var files = assetDir.getFiles('*.png'), byNo = {}, k;
         for (k = 0; k < files.length; k++) {
@@ -742,6 +756,7 @@ var PLAN = {
     })();
 
     // ---------------------------------------------------------------- 13. \u30C6\u30AD\u30B9\u30C8\uFF08\u524D\u56DE\u30C7\u30B6\u30A4\u30F3\u306EMOGRT\u3002\u30DD\u30A4\u30F3\u30C8\u30C6\u30AD\u30B9\u30C8\u306E\u307E\u307E\u7DE8\u96C6\u53EF\u80FD\uFF09
+    $.global.EP19_STEP = '13. \u30C6\u30AD\u30B9\u30C8\uFF08\u524D\u56DE\u30C7\u30B6\u30A4\u30F3\u306EMOGRT\u3002\u30DD\u30A4\u30F3\u30C8\u30C6\u30AD\u30B9\u30C8\u306E\u307E\u307E\u7DE8\u96C6\u53EF\u80FD\uFF09';
     function setMogrtText(ti, text) {
         var mgt = null;
         try { mgt = ti.getMGTComponent(); } catch (e) { }
@@ -894,6 +909,7 @@ var PLAN = {
     })();
 
     // ---------------------------------------------------------------- 14. \u8272\u88DC\u6B63\uFF08Lumetri\u3002\u5F8C\u304B\u3089\u5909\u66F4\u53EF\u80FD\uFF09
+    $.global.EP19_STEP = '14. \u8272\u88DC\u6B63\uFF08Lumetri\u3002\u5F8C\u304B\u3089\u5909\u66F4\u53EF\u80FD\uFF09';
     (function () {
         var c = PLAN.color;
         var targets = [seq];
@@ -928,6 +944,7 @@ var PLAN = {
     })();
 
     // ---------------------------------------------------------------- 15. review markers
+    $.global.EP19_STEP = '15. review markers';
     for (i = 0; i < PLAN.review.length; i++) {
         var r = PLAN.review[i];
         addMarker(seq, mapF(tcToFrames(r.at)), mapF(tcToFrames(r.end)), '\u78BA\u8A8D', r.text, 'white');
@@ -936,6 +953,7 @@ var PLAN = {
     addMarker(seq, mapF(tcToFrames('04:14.67')), mapF(tcToFrames('04:19.50')), '\u78BA\u8A8D\uFF1A\u56F3\u89E3C\u3068\u5F37\u8ABF\u30C6\u30ED\u30C3\u30D7\u304C\u91CD\u306A\u308B', '\u56F3\u89E3C\u8868\u793A\u4E2D\u306B\u5F37\u8ABF\u30C6\u30ED\u30C3\u30D7\u300C\u9AD8\u3044\u6B21\u5143\u3082 \u4F4E\u3044\u6B21\u5143\u3082\uFF0F\u611B\u3067\u3042\u308B\u300D\u3002\u30EC\u30A4\u30A2\u30A6\u30C8\u304C\u5E72\u6E09\u3057\u306A\u3044\u304B\u78BA\u8A8D', 'white');
 
     // ---------------------------------------------------------------- 16. automatic QC
+    $.global.EP19_STEP = '16. automatic QC';
     (function () {
         var k, a, prev, gaps;
         // V1 / A1 continuity
@@ -971,6 +989,7 @@ var PLAN = {
     function tcToFramesFromFmt(s) { var p = s.split(':'); return (parseInt(p[0], 10) * 60 + parseInt(p[1], 10)) * PLAN.fps + parseInt(p[2], 10); }
 
     // ---------------------------------------------------------------- 17. review sequence with timecode + MP4
+    $.global.EP19_STEP = '17. review sequence with timecode + MP4';
     var mp4Path = projDir.fsName + '/' + PLAN.newSequenceName + '_\u78BA\u8A8D\u7528TC.mp4';
     (function () {
         var rs = null, b = seqIds();
@@ -1008,6 +1027,7 @@ var PLAN = {
     })();
 
     // ---------------------------------------------------------------- 18. save + report
+    $.global.EP19_STEP = '18. save + report';
     activate(seq);
     try { app.project.save(); } catch (eS) { }
 

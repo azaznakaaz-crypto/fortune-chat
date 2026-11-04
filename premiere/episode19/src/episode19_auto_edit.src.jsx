@@ -275,6 +275,7 @@
     }
 
     // ---------------------------------------------------------------- 0. preflight
+    $.global.EP19_STEP = '0. preflight';
     // EP19_MODE: 'check' = 何も変更せずに準備状況だけ表示 / 'run' = 実行（パネルのボタンが設定）
     var MODE = (typeof EP19_MODE !== 'undefined' && EP19_MODE === 'check') ? 'check' : 'run';
     var CHECKS = [];      // [ok(bool), blocking(bool), text]
@@ -334,16 +335,21 @@
     }
     if (blocked()) { finish('準備が足りないため中止しました（何も変更していません）。\n\n' + checkText()); return; }
 
-    if (!confirm('確認用プロジェクトで自動編集を実行します。\n\n' +
-        '・開いている「' + projName + '」を「' + new File(newProjPath).displayName + '」として別名保存してから作業します\n' +
-        '・元の .prproj／元シーケンス／基本テロップは変更しません\n\n実行しますか？')) { return; }
+    // 実行の最終確認はパネル側で行う（ボタンを2回押す）。Premiere の confirm() は版によって引数エラーになるため使わない
+    if (typeof EP19_CONFIRMED === 'undefined' || EP19_CONFIRMED !== true) {
+        var ok = false;
+        try { ok = confirm('確認用プロジェクト「' + projName + '」で自動編集を実行しますか？', false, '19 自動編集'); } catch (eCf) { ok = false; }
+        if (!ok) { finish('実行を取り消しました（何も変更していません）。'); return; }
+    }
 
     // ---------------------------------------------------------------- 1. save as (keep original project untouched)
+    $.global.EP19_STEP = '1. save as (keep original project untouched)';
     app.project.saveAs(newProjPath);
     log('作業用プロジェクトとして保存: ' + newProjPath);
     srcSeq = findSeqByName(PLAN.sourceSequenceName)[0];
 
     // ---------------------------------------------------------------- 2. clone source sequence
+    $.global.EP19_STEP = '2. clone source sequence';
     var before = seqIds();
     srcSeq.clone();
     var created = newSeqSince(before);
@@ -365,6 +371,7 @@
     }
 
     // ---------------------------------------------------------------- 3. CSV markers (before inserting highlights/openings)
+    $.global.EP19_STEP = '3. CSV markers (before inserting highlights/openings)';
     var csvMarkers = [];
     (function () {
         var csv = null, files = assetDir.getFiles('*.csv'), k;
@@ -386,6 +393,7 @@
     })();
 
     // ---------------------------------------------------------------- 5. highlight subsequences (from the clone, before shifting)
+    $.global.EP19_STEP = '5. highlight subsequences (from the clone, before shifting)';
     var seqBin = getBin('19_自動編集案_ネスト');
     function makeSubsequence(fromSeq, startFrame, endFrame, name) {
         var b = seqIds();
@@ -419,6 +427,7 @@
     }
 
     // ---------------------------------------------------------------- 6. previous project → opening ①② (copies only)
+    $.global.EP19_STEP = '6. previous project → opening ①② (copies only)';
     var prevSeq = null;
     (function () {
         var b = seqIds(), ok = false;
@@ -474,6 +483,7 @@
     }
 
     // ---------------------------------------------------------------- 8. make room: shift original clips & markers
+    $.global.EP19_STEP = '8. make room: shift original clips & markers';
     (function () {
         var groups = [seq.videoTracks, seq.audioTracks], g, k, j, moved = 0, straddle = 0;
         for (g = 0; g < groups.length; g++) {
@@ -499,6 +509,7 @@
     })();
 
     // ---------------------------------------------------------------- 9. place highlights and openings on V1
+    $.global.EP19_STEP = '9. place highlights and openings on V1';
     function placeNest(nestSeq, atFrame, label) {
         if (!nestSeq) { return null; }
         try { seq.videoTracks[0].overwriteClip(nestSeq.projectItem, sec(atFrame)); } catch (e) { }
@@ -544,6 +555,7 @@
     })();
 
     // ---------------------------------------------------------------- 10. BGM bed (highlights → end of opening talk)
+    $.global.EP19_STEP = '10. BGM bed (highlights → end of opening talk)';
     (function () {
         var aIdx = PLAN.tracks.bgmAudio;
         if (!BGM) { fail('BGM（' + PLAN.previousProject.bgmName + '）', '前回プロジェクトからBGMクリップを取得できませんでした', 0, seq); return; }
@@ -568,6 +580,7 @@
     })();
 
     // ---------------------------------------------------------------- 11. 画角（カット点のみ・途中ズームなし）
+    $.global.EP19_STEP = '11. 画角（カット点のみ・途中ズームなし）';
     (function () {
         var k, j;
         for (k = 0; k < PLAN.zoom.length; k++) {
@@ -591,6 +604,7 @@
     })();
 
     // ---------------------------------------------------------------- 12. 写真インサート（episode19_assets の01〜06を直接参照）
+    $.global.EP19_STEP = '12. 写真インサート（episode19_assets の01〜06を直接参照）';
     (function () {
         var files = assetDir.getFiles('*.png'), byNo = {}, k;
         for (k = 0; k < files.length; k++) {
@@ -632,6 +646,7 @@
     })();
 
     // ---------------------------------------------------------------- 13. テキスト（前回デザインのMOGRT。ポイントテキストのまま編集可能）
+    $.global.EP19_STEP = '13. テキスト（前回デザインのMOGRT。ポイントテキストのまま編集可能）';
     function setMogrtText(ti, text) {
         var mgt = null;
         try { mgt = ti.getMGTComponent(); } catch (e) { }
@@ -784,6 +799,7 @@
     })();
 
     // ---------------------------------------------------------------- 14. 色補正（Lumetri。後から変更可能）
+    $.global.EP19_STEP = '14. 色補正（Lumetri。後から変更可能）';
     (function () {
         var c = PLAN.color;
         var targets = [seq];
@@ -818,6 +834,7 @@
     })();
 
     // ---------------------------------------------------------------- 15. review markers
+    $.global.EP19_STEP = '15. review markers';
     for (i = 0; i < PLAN.review.length; i++) {
         var r = PLAN.review[i];
         addMarker(seq, mapF(tcToFrames(r.at)), mapF(tcToFrames(r.end)), '確認', r.text, 'white');
@@ -826,6 +843,7 @@
     addMarker(seq, mapF(tcToFrames('04:14.67')), mapF(tcToFrames('04:19.50')), '確認：図解Cと強調テロップが重なる', '図解C表示中に強調テロップ「高い次元も 低い次元も／愛である」。レイアウトが干渉しないか確認', 'white');
 
     // ---------------------------------------------------------------- 16. automatic QC
+    $.global.EP19_STEP = '16. automatic QC';
     (function () {
         var k, a, prev, gaps;
         // V1 / A1 continuity
@@ -861,6 +879,7 @@
     function tcToFramesFromFmt(s) { var p = s.split(':'); return (parseInt(p[0], 10) * 60 + parseInt(p[1], 10)) * PLAN.fps + parseInt(p[2], 10); }
 
     // ---------------------------------------------------------------- 17. review sequence with timecode + MP4
+    $.global.EP19_STEP = '17. review sequence with timecode + MP4';
     var mp4Path = projDir.fsName + '/' + PLAN.newSequenceName + '_確認用TC.mp4';
     (function () {
         var rs = null, b = seqIds();
@@ -898,6 +917,7 @@
     })();
 
     // ---------------------------------------------------------------- 18. save + report
+    $.global.EP19_STEP = '18. save + report';
     activate(seq);
     try { app.project.save(); } catch (eS) { }
 

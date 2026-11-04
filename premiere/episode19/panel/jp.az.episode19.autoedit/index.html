@@ -29,8 +29,8 @@
     for (i = 0; i < btns.length; i++) { btns[i].disabled = true; }
     out.textContent = mode === 'check' ? '確認中…' : '実行中…（Premiere に出る確認ダイアログに答えてください。数分かかります）';
     var file = extRoot() + '/jsx/episode19_auto_edit.jsx';
-    var script = 'EP19_MODE=' + JSON.stringify(mode) + ';$.global.EP19_RESULT="";' +
-                 'try{$.evalFile(' + JSON.stringify(file) + ');}catch(e){$.global.EP19_RESULT="エラー: "+e+" (行 "+e.line+")";}' +
+    var script = 'EP19_MODE=' + JSON.stringify(mode) + ';EP19_CONFIRMED=' + (mode === 'run') + ';$.global.EP19_RESULT="";$.global.EP19_STEP="準備";' +
+                 'try{$.evalFile(' + JSON.stringify(file) + ');}catch(e){$.global.EP19_RESULT="エラー: "+e+" (行 "+e.line+")\\n工程: "+$.global.EP19_STEP;}' +
                  '$.global.EP19_RESULT;';
     window.__adobe_cep__.evalScript(script, function (r) {
       out.textContent = r || '終了しました（中止した場合は何も変更していません）。';
@@ -38,7 +38,20 @@
     });
   }
   document.getElementById('check').onclick = function () { call('check'); };
-  document.getElementById('run').onclick = function () { call('run'); };
+  // 実行は2回押しで確認（Premiere のダイアログを使わない）
+  var armed = false, runBtn = document.getElementById('run');
+  runBtn.onclick = function () {
+    if (!armed) {
+      armed = true;
+      runBtn.textContent = '本当に実行する（もう一度押す）';
+      document.getElementById('out').textContent = '確認用プロジェクトを別名保存してから自動編集します。元のプロジェクトは変更しません。\n実行する場合は、青いボタンをもう一度押してください。';
+      setTimeout(function () { if (armed) { armed = false; runBtn.textContent = '② 自動編集を実行する'; } }, 15000);
+      return;
+    }
+    armed = false;
+    runBtn.textContent = '② 自動編集を実行する';
+    call('run');
+  };
 </script>
 </body>
 </html>
