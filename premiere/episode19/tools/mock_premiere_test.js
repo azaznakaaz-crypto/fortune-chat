@@ -146,7 +146,7 @@ class Sequence {
     this._in = 0; this._out = null;
   }
   _end() { let m = 0; for (const g of [this.videoTracks, this.audioTracks]) for (const t of g) for (const i of t.items) m = Math.max(m, i._e); return m; }
-  get end() { return T(this._end()); }
+  get end() { return String(this._end()); }   // 実機の Sequence.end は ticks の文字列
   setInPoint(s) { this._in = toTicks(s); }
   setOutPoint(s) { this._out = toTicks(s); }
   addTracks(nv, na) {

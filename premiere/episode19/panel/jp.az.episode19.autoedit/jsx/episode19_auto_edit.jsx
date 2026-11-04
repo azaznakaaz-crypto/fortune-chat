@@ -159,7 +159,11 @@ var PLAN = {
     }
     function sec(f) { return f * TPF / TPS; }
     function T(f) { var t = new Time(); t.ticks = String(f * TPF); return t; }
-    function framesOf(timeObj) { return Math.round(Number(timeObj.ticks) / TPF); }
+    // Time \u30AA\u30D6\u30B8\u30A7\u30AF\u30C8\uFF08.ticks\uFF09\u3068\u3001ticks \u6587\u5B57\u5217\uFF08Sequence.end \u306A\u3069\uFF09\u306E\u4E21\u65B9\u3092\u53D7\u3051\u4ED8\u3051\u308B
+    function framesOf(t) {
+        var ticks = (t !== null && typeof t === 'object' && t.ticks !== undefined) ? t.ticks : t;
+        return Math.round(Number(ticks) / TPF);
+    }
     function trim(s) { return String(s).replace(/^\s+|\s+$/g, ''); }
     function oneLine(s) { return String(s).replace(/\r|\n/g, ' / '); }
 
@@ -512,7 +516,7 @@ var PLAN = {
         var sub = null;
         try { sub = fromSeq.createSubsequence(true); } catch (e) { }
         if (!sub) { var n = newSeqSince(b); sub = n.length ? n[0] : null; }
-        try { fromSeq.setInPoint(0); fromSeq.setOutPoint(fromSeq.end); } catch (e2) { }
+        try { fromSeq.setInPoint(0); fromSeq.setOutPoint(sec(framesOf(fromSeq.end))); } catch (e2) { }
         if (!sub) { return null; }
         sub.name = name;
         try { sub.projectItem.moveBin(seqBin); } catch (e3) { }

@@ -49,7 +49,11 @@
     }
     function sec(f) { return f * TPF / TPS; }
     function T(f) { var t = new Time(); t.ticks = String(f * TPF); return t; }
-    function framesOf(timeObj) { return Math.round(Number(timeObj.ticks) / TPF); }
+    // Time オブジェクト（.ticks）と、ticks 文字列（Sequence.end など）の両方を受け付ける
+    function framesOf(t) {
+        var ticks = (t !== null && typeof t === 'object' && t.ticks !== undefined) ? t.ticks : t;
+        return Math.round(Number(ticks) / TPF);
+    }
     function trim(s) { return String(s).replace(/^\s+|\s+$/g, ''); }
     function oneLine(s) { return String(s).replace(/\r|\n/g, ' / '); }
 
@@ -402,7 +406,7 @@
         var sub = null;
         try { sub = fromSeq.createSubsequence(true); } catch (e) { }
         if (!sub) { var n = newSeqSince(b); sub = n.length ? n[0] : null; }
-        try { fromSeq.setInPoint(0); fromSeq.setOutPoint(fromSeq.end); } catch (e2) { }
+        try { fromSeq.setInPoint(0); fromSeq.setOutPoint(sec(framesOf(fromSeq.end))); } catch (e2) { }
         if (!sub) { return null; }
         sub.name = name;
         try { sub.projectItem.moveBin(seqBin); } catch (e3) { }
