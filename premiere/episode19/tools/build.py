@@ -58,6 +58,7 @@ def build_doc(plan):
     main_at = ot_end + shift
     mp = lambda tc: (frames(tc, fps) + (pre if frames(tc, fps) < op2_src else shift))
     F = lambda f: fmt(f, fps)
+    base = plan['speaker']['baseScale']
     L = []
     L.append('# タイムライン計画（自動生成：tools/build.py）')
     L.append('')
@@ -69,8 +70,8 @@ def build_doc(plan):
     L.append('|---|---|---|---|---|---|')
     names = ['ハイライト①', 'ハイライト②', 'ハイライト③']
     for i, (h, s, n) in enumerate(hls):
-        L.append('| %d | %s | %s | %s | %df | 現在 %s〜%s・話者%d%%・タイトル「%s」 |' % (
-            i + 1, names[i], F(s), F(s + n), n, h['start'], h['end'], h['scale'], h['title'].replace('\r', ' / ')))
+        L.append('| %d | %s | %s | %s | %df | 現在 %s〜%s・話者%g%%・タイトル「%s」 |' % (
+            i + 1, names[i], F(s), F(s + n), n, h['start'], h['end'], base * h['scale'] / 100, h['title'].replace('\r', ' / ')))
     L.append('| 4 | オープニング① | %s | %s | %df | 前回 %s〜%s を複製（BGMは下のベッドに統合） |' % (F(t), F(pre), op1, pp['opening1']['start'], pp['opening1']['end']))
     L.append('| 5 | オープニングトーク前半 | %s | %s | %df | 現在 00:00.00〜%s（〜「今日はお話ししていきたいと思います」） |' % (F(pre), F(op2_at), op2_src, plan['opening2At']))
     L.append('| 6 | オープニング② | %s | %s | %df | 前回 %s〜%s を複製（前回のOP②専用BGM込み） |' % (F(op2_at), F(op2_at + op2), op2, pp['opening2']['start'], pp['opening2']['end']))
@@ -129,10 +130,12 @@ def build_doc(plan):
         L.append('')
     L.append('## 画角（V1・カット点のみ）')
     L.append('')
+    L.append('話者は全編 **%g%%** を基準にし、顔が画面中央に来るよう位置を合わせます。設計書の108%%／110%%は、この基準に対する倍率として適用します。' % base)
+    L.append('')
     L.append('| 現在 | 完成 | 画角 | 理由 |')
     L.append('|---|---|---:|---|')
     for z in plan['zoom']:
-        L.append('| %s〜%s | %s〜%s | %d%% | %s |' % (z['start'], z['end'], F(mp(z['start'])), F(mp(z['end'])), z['scale'], z['reason']))
+        L.append('| %s〜%s | %s〜%s | %g%%（基準×%d%%） | %s |' % (z['start'], z['end'], F(mp(z['start'])), F(mp(z['end'])), base * z['scale'] / 100, z['scale'], z['reason']))
     L.append('')
     L.append('## 基本テロップ')
     L.append('')

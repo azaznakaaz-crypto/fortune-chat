@@ -60,6 +60,13 @@ var PLAN = {
     { "start": "05:31.80", "end": "05:40.47", "text": "\u4F55\u3092\u5931\u3046\u3068\u601D\u3063\u3066\u3044\u3066\r\u4F55\u304C\u6016\u3044\u3093\u3060\u308D\u3046" }
   ],
 
+  "speaker": {
+    "baseScale": 140,
+    "face": null,
+    "target": [960, 470],
+    "note": "face \u306F\u5143\u6620\u50CF\uFF081920x1080\uFF09\u3067\u306E\u9854\u306E\u4E2D\u5FC3\u306E\u30D4\u30AF\u30BB\u30EB\u5EA7\u6A19\u3002\u78BA\u8A8D\u7528MP4\u306E\u753B\u9762\u304B\u3089\u6C7A\u3081\u308B\u3002null \u306E\u9593\u306F\u62E1\u5927\u306E\u307F"
+  },
+
   "zoom": [
     { "start": "00:20.90", "end": "00:26.67", "scale": 110, "reason": "\u5192\u982D\u306E\u9006\u8AAC" },
     { "start": "01:21.83", "end": "01:24.93", "scale": 108, "reason": "\u4ECA\u56DE\u306E\u554F\u984C\u63D0\u8D77" },
@@ -304,6 +311,22 @@ var PLAN = {
         p.setValue(value, true);
         return true;
     }
+    // \u8A71\u8005\u306E\u753B\u89D2\uFF1A\u57FA\u6E96 PLAN.speaker.baseScale%\uFF08\u8A2D\u8A08\u66F8\u306E108/110%\u306F\u57FA\u6E96\u306B\u5BFE\u3059\u308B\u500D\u7387\uFF09\u3002
+    // \u9854\u306E\u4F4D\u7F6E PLAN.speaker.face\uFF08\u5143\u6620\u50CF\u306E\u30D4\u30AF\u30BB\u30EB\u5EA7\u6A19\uFF09\u304C PLAN.speaker.target \u306B\u6765\u308B\u3088\u3046\u4F4D\u7F6E\u3082\u5408\u308F\u305B\u308B\uFF08\u9ED2\u3044\u4F59\u767D\u304C\u51FA\u306A\u3044\u7BC4\u56F2\u3067\uFF09
+    function speakerScale(rel) { return PLAN.speaker.baseScale * (rel || 100) / 100; }
+    function frameSpeaker(ti, rel) {
+        var S = speakerScale(rel), sp = PLAN.speaker, W = 1920, H = 1080;
+        var ok = setScale(ti, S);
+        if (sp.face) {
+            var k = S / 100;
+            var px = sp.target[0] - k * (sp.face[0] - W / 2), py = sp.target[1] - k * (sp.face[1] - H / 2);
+            var mx = (W * k - W) / 2, my = (H * k - H) / 2;      // \u306F\u307F\u51FA\u3057\u8A31\u5BB9\u91CF
+            px = Math.max(W / 2 - mx, Math.min(W / 2 + mx, px));
+            py = Math.max(H / 2 - my, Math.min(H / 2 + my, py));
+            setPosition(ti, px / W, py / H);
+        }
+        return ok;
+    }
     function setPosition(ti, x, y) {
         var p = findProp(motion(ti), ['\u4F4D\u7F6E', 'Position']);
         if (!p) { return false; }
@@ -541,8 +564,8 @@ var PLAN = {
         // \u524D\u56DE\u30C7\u30B6\u30A4\u30F3\u306B\u5408\u308F\u305B\u3001\u30CF\u30A4\u30E9\u30A4\u30C8\u306B\u306F\u57FA\u672C\u30C6\u30ED\u30C3\u30D7\u3092\u5165\u308C\u306A\u3044\uFF08\u8A71\u8005\u6620\u50CF\uFF0B\u97F3\u58F0\u306E\u307F\uFF09
         for (var vt = 1; vt < sub.videoTracks.numTracks; vt++) { removeItems(sub.videoTracks[vt]); }
         var a = clipsOf(sub.videoTracks[0]);
-        for (var q = 0; q < a.length; q++) { if (isSpeakerClip(a[q])) { setScale(a[q], HL[i].def.scale); } }
-        log(sub.name + ' \u4F5C\u6210\uFF08' + HL[i].len + 'f, \u753B\u89D2' + HL[i].def.scale + '%\uFF09');
+        for (var q = 0; q < a.length; q++) { if (isSpeakerClip(a[q])) { frameSpeaker(a[q], HL[i].def.scale); } }
+        log(sub.name + ' \u4F5C\u6210\uFF08' + HL[i].len + 'f, \u753B\u89D2' + speakerScale(HL[i].def.scale) + '%\uFF09');
     }
 
     // ---------------------------------------------------------------- 6. previous project \u2192 opening \u2460\u2461 (copies only)
@@ -707,6 +730,10 @@ var PLAN = {
     $.global.EP19_STEP = '11. \u753B\u89D2\uFF08\u30AB\u30C3\u30C8\u70B9\u306E\u307F\u30FB\u9014\u4E2D\u30BA\u30FC\u30E0\u306A\u3057\uFF09';
     (function () {
         var k, j;
+        // \u307E\u305A\u5168\u3066\u306E\u8A71\u8005\u30AF\u30EA\u30C3\u30D7\u3092\u57FA\u6E96\u306E\u753B\u89D2\u30FB\u4F4D\u7F6E\u306B\u3059\u308B
+        var all = clipsOf(seq.videoTracks[0]), nb = 0;
+        for (j = 0; j < all.length; j++) { if (isSpeakerClip(all[j]) && frameSpeaker(all[j], 100)) { nb++; } }
+        log('\u8A71\u8005\u306E\u57FA\u6E96\u753B\u89D2 ' + PLAN.speaker.baseScale + '%' + (PLAN.speaker.face ? '\uFF08\u9854\u3092\u4E2D\u592E\u5BC4\u305B\uFF09' : '\uFF08\u4F4D\u7F6E\u306F\u672A\u8ABF\u6574\uFF09') + '\uFF1A' + nb + '\u30AF\u30EA\u30C3\u30D7');
         for (k = 0; k < PLAN.zoom.length; k++) {
             var z = PLAN.zoom[k], s = mapF(tcToFrames(z.start)), e = mapF(tcToFrames(z.end));
             var v1 = seq.videoTracks[0];
@@ -720,9 +747,9 @@ var PLAN = {
             var a = clipsOf(v1), n = 0;
             for (j = 0; j < a.length; j++) {
                 var cs = framesOf(a[j].start), ce = framesOf(a[j].end);
-                if (cs >= s && ce <= e && isSpeakerClip(a[j])) { if (setScale(a[j], z.scale)) { n++; } }
+                if (cs >= s && ce <= e && isSpeakerClip(a[j])) { if (frameSpeaker(a[j], z.scale)) { n++; } }
             }
-            log('\u753B\u89D2 ' + z.scale + '% ' + fmt(s) + '\u301C' + fmt(e) + '\uFF08' + n + '\u30AF\u30EA\u30C3\u30D7, ' + z.reason + '\uFF09');
+            log('\u753B\u89D2 ' + speakerScale(z.scale) + '%\uFF08\u57FA\u6E96\u00D7' + z.scale + '%\uFF09 ' + fmt(s) + '\u301C' + fmt(e) + '\uFF08' + n + '\u30AF\u30EA\u30C3\u30D7, ' + z.reason + '\uFF09');
             if (!n) { fail('\u753B\u89D2' + z.scale + '%\uFF08' + z.reason + '\uFF09', '\u5BFE\u8C61\u30AF\u30EA\u30C3\u30D7\u304C\u898B\u3064\u304B\u308A\u307E\u305B\u3093', s, seq); }
         }
     })();

@@ -193,6 +193,22 @@
         p.setValue(value, true);
         return true;
     }
+    // 話者の画角：基準 PLAN.speaker.baseScale%（設計書の108/110%は基準に対する倍率）。
+    // 顔の位置 PLAN.speaker.face（元映像のピクセル座標）が PLAN.speaker.target に来るよう位置も合わせる（黒い余白が出ない範囲で）
+    function speakerScale(rel) { return PLAN.speaker.baseScale * (rel || 100) / 100; }
+    function frameSpeaker(ti, rel) {
+        var S = speakerScale(rel), sp = PLAN.speaker, W = 1920, H = 1080;
+        var ok = setScale(ti, S);
+        if (sp.face) {
+            var k = S / 100;
+            var px = sp.target[0] - k * (sp.face[0] - W / 2), py = sp.target[1] - k * (sp.face[1] - H / 2);
+            var mx = (W * k - W) / 2, my = (H * k - H) / 2;      // はみ出し許容量
+            px = Math.max(W / 2 - mx, Math.min(W / 2 + mx, px));
+            py = Math.max(H / 2 - my, Math.min(H / 2 + my, py));
+            setPosition(ti, px / W, py / H);
+        }
+        return ok;
+    }
     function setPosition(ti, x, y) {
         var p = findProp(motion(ti), ['位置', 'Position']);
         if (!p) { return false; }
@@ -430,8 +446,8 @@
         // 前回デザインに合わせ、ハイライトには基本テロップを入れない（話者映像＋音声のみ）
         for (var vt = 1; vt < sub.videoTracks.numTracks; vt++) { removeItems(sub.videoTracks[vt]); }
         var a = clipsOf(sub.videoTracks[0]);
-        for (var q = 0; q < a.length; q++) { if (isSpeakerClip(a[q])) { setScale(a[q], HL[i].def.scale); } }
-        log(sub.name + ' 作成（' + HL[i].len + 'f, 画角' + HL[i].def.scale + '%）');
+        for (var q = 0; q < a.length; q++) { if (isSpeakerClip(a[q])) { frameSpeaker(a[q], HL[i].def.scale); } }
+        log(sub.name + ' 作成（' + HL[i].len + 'f, 画角' + speakerScale(HL[i].def.scale) + '%）');
     }
 
     // ---------------------------------------------------------------- 6. previous project → opening ①② (copies only)
@@ -596,6 +612,10 @@
     $.global.EP19_STEP = '11. 画角（カット点のみ・途中ズームなし）';
     (function () {
         var k, j;
+        // まず全ての話者クリップを基準の画角・位置にする
+        var all = clipsOf(seq.videoTracks[0]), nb = 0;
+        for (j = 0; j < all.length; j++) { if (isSpeakerClip(all[j]) && frameSpeaker(all[j], 100)) { nb++; } }
+        log('話者の基準画角 ' + PLAN.speaker.baseScale + '%' + (PLAN.speaker.face ? '（顔を中央寄せ）' : '（位置は未調整）') + '：' + nb + 'クリップ');
         for (k = 0; k < PLAN.zoom.length; k++) {
             var z = PLAN.zoom[k], s = mapF(tcToFrames(z.start)), e = mapF(tcToFrames(z.end));
             var v1 = seq.videoTracks[0];
@@ -609,9 +629,9 @@
             var a = clipsOf(v1), n = 0;
             for (j = 0; j < a.length; j++) {
                 var cs = framesOf(a[j].start), ce = framesOf(a[j].end);
-                if (cs >= s && ce <= e && isSpeakerClip(a[j])) { if (setScale(a[j], z.scale)) { n++; } }
+                if (cs >= s && ce <= e && isSpeakerClip(a[j])) { if (frameSpeaker(a[j], z.scale)) { n++; } }
             }
-            log('画角 ' + z.scale + '% ' + fmt(s) + '〜' + fmt(e) + '（' + n + 'クリップ, ' + z.reason + '）');
+            log('画角 ' + speakerScale(z.scale) + '%（基準×' + z.scale + '%） ' + fmt(s) + '〜' + fmt(e) + '（' + n + 'クリップ, ' + z.reason + '）');
             if (!n) { fail('画角' + z.scale + '%（' + z.reason + '）', '対象クリップが見つかりません', s, seq); }
         }
     })();
